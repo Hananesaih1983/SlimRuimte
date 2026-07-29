@@ -4,7 +4,7 @@
  * The shape defined here is what lands in `public.projects.room_dimensions`
  * (JSONB), so both paths converge on one structure — everything downstream
  * (floor plan SVG/PDF/DXF, GLB, render prompts) reads this and never needs to
- * know whether the numbers came from magicplan or from a tape measure.
+ * know whether the numbers came from a LiDAR scan or from a tape measure.
  */
 
 /** Compass ids, ordered the way the wizard walks them and the SVG draws them. */

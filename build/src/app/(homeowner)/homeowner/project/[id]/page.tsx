@@ -207,13 +207,16 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 function describeScanMethod(method: string | null): string {
-  if (method === "lidar") return "LiDAR (magicplan)";
+  // Deliberately source-agnostic: `scan_source` is shown next to this and names
+  // the app, and the LiDAR path has changed provider once already.
+  if (method === "lidar") return "LiDAR-scan";
   if (method === "manual") return "Handmatig gemeten";
   return "Nog niet gescand";
 }
 
 function describeScanSource(source: string | null, magicplanId: string | null): string {
   if (source === "manual_entry") return "Handmatige invoer";
+  if (source === "roomplan") return "Apple RoomPlan · 3D Scanner App";
   if (source === "magicplan_mock") return `Testdata${magicplanId ? ` · ${magicplanId}` : ""}`;
   if (source === "magicplan") return `magicplan${magicplanId ? ` · ${magicplanId}` : ""}`;
   return "—";

@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * LiDAR path: scan in the magicplan app, then import the result by project code.
+ * LiDAR path: scan in the 3D Scanner App, then upload the exported Room.json.
  *
- * The scan itself happens outside our app — magicplan owns the ARKit capture —
- * so all we do here is instruct, then pull the finished plan in through
- * /api/scan/import.
+ * The capture itself happens outside our app — Apple's RoomPlan owns the ARKit
+ * session — so all we do here is instruct, then parse the export through
+ * /api/scan/roomplan-upload.
  */
 export default async function LidarScanPage({
   searchParams,

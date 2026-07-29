@@ -18,7 +18,7 @@
  *
  * The consequence for the UI: both paths are always offered and this only
  * decides which card gets the primary call to action. A non-Pro iPhone user who
- * taps the LiDAR card lands on the magicplan instructions and finds out there;
+ * taps the LiDAR card lands on the scan instructions and finds out there;
  * nobody is ever locked out of a working path. If we later need certainty, the
  * honest fix is a client-side WebXR / `navigator.xr` probe or simply asking the
  * user — not a longer UA regex.

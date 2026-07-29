@@ -1,3 +1,5 @@
+// DEPRECATED: magicplan path — use /api/scan/roomplan-upload for RoomPlan instead
+
 import { isUuid, jsonError, readJsonBody, requireApiRole } from "@/lib/api-auth";
 import { PROJECT_STATUS_PLAN_READY } from "@/lib/projects";
 import { computeFootprint, parseWall, roundCm } from "@/lib/scan/geometry";

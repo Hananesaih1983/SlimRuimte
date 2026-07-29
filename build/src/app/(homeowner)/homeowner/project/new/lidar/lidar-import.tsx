@@ -8,45 +8,66 @@ import { RoomDiagramSVG } from "@/components/scan/RoomDiagramSVG";
 import type { RoomDimensions } from "@/lib/scan/types";
 
 /**
- * Two-step LiDAR import: instructions, then the project code.
+ * Two-step RoomPlan import: instructions, then the Room.json upload.
  *
  * Kept on one route rather than two so the user can flip back to the steps
- * while holding their phone, without losing the code they already typed.
+ * while holding their phone, without losing the file they already picked.
  */
 
 const SCAN_STEPS = [
-  "Download de magicplan-app uit de App Store en maak een gratis account aan.",
-  "Tik op ‘Nieuw project’ en kies ‘Ruimte scannen’ (LiDAR).",
-  "Loop rustig langs alle muren tot de ruimte volledig gesloten is.",
-  "Controleer deuren en ramen en rond de scan af.",
-  "Open ‘Projectinfo’ en noteer de projectcode — die vul je hieronder in.",
+  "Download de gratis 3D Scanner App uit de App Store (door Laan Labs). Geen account nodig.",
+  "Open de app en tik op de + knop om een nieuwe scan te starten.",
+  "Loop rustig langs alle muren tot de ruimte volledig gesloten is (±2 minuten).",
+  "Tik op Gereed → Exporteer → Room.json en sla het bestand op.",
+  "Upload het Room.json bestand hieronder — wij verwerken het automatisch.",
 ];
+
+const WRONG_FILE_TYPE =
+  "Selecteer een geldig Room.json bestand (geëxporteerd uit 3D Scanner App).";
 
 export function LidarImport({ projectId }: { projectId: string }) {
   const router = useRouter();
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [projectCode, setProjectCode] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imported, setImported] = useState<RoomDimensions | null>(null);
 
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const selected = event.target.files?.[0] ?? null;
+
+    // `accept` filters the picker, not a drag-and-drop or an "All files" pick,
+    // so the extension is checked here too before we spend an upload on it.
+    if (selected && !isJsonFile(selected)) {
+      setFile(null);
+      setError(WRONG_FILE_TYPE);
+      return;
+    }
+
+    setFile(selected);
+    setError(null);
+  }
+
   async function handleImport(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (projectCode.trim() === "") {
-      setError("Vul je magicplan-projectcode in.");
+    if (!file || !isJsonFile(file)) {
+      setError(WRONG_FILE_TYPE);
       return;
     }
 
     setError(null);
     setPending(true);
 
+    const body = new FormData();
+    body.append("file", file);
+    body.append("projectId", projectId);
+
     try {
-      const response = await fetch("/api/scan/import", {
+      const response = await fetch("/api/scan/roomplan-upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectCode: projectCode.trim(), projectId }),
+        body,
       });
 
       const payload = await response.json().catch(() => null);
@@ -57,7 +78,7 @@ export function LidarImport({ projectId }: { projectId: string }) {
         return;
       }
 
-      setImported(payload as RoomDimensions);
+      setImported(payload.dimensions as RoomDimensions);
       setPending(false);
     } catch {
       setError("Geen verbinding. Controleer je internet en probeer het opnieuw.");
@@ -82,13 +103,15 @@ export function LidarImport({ projectId }: { projectId: string }) {
           Stap {step} van 2
         </p>
         <h1 className="text-2xl font-semibold">
-          {step === 1 ? "Scan je ruimte in magicplan" : "Importeer je scan"}
+          {step === 1
+            ? "Scan je ruimte met de 3D Scanner App"
+            : "Upload je scan"}
         </h1>
       </header>
 
       {step === 1 ? (
         <div className="flex flex-col gap-6">
-          <MagicplanLogo />
+          <AppStoreBadge />
 
           <ol className="flex flex-col gap-3">
             {SCAN_STEPS.map((text, index) => (
@@ -125,29 +148,30 @@ export function LidarImport({ projectId }: { projectId: string }) {
           ) : null}
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="projectCode" className="text-sm font-medium">
-              magicplan-projectcode
+            <label htmlFor="roomJson" className="text-sm font-medium">
+              Selecteer Room.json
             </label>
             <input
-              id="projectCode"
-              name="projectCode"
-              autoComplete="off"
-              autoCapitalize="characters"
-              spellCheck={false}
+              id="roomJson"
+              name="file"
+              type="file"
+              accept=".json,application/json"
               required
-              value={projectCode}
-              onChange={(event) => setProjectCode(event.target.value)}
-              placeholder="bijv. MP-4821-KTN"
-              className="h-11 rounded-lg border border-border bg-background px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              onChange={handleFileChange}
+              className="rounded-lg border border-border bg-background text-sm outline-none file:mr-3 file:h-11 file:cursor-pointer file:border-0 file:border-r file:border-border file:bg-muted file:px-3 file:text-sm file:font-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
-            <p className="text-xs text-muted-foreground">
-              Te vinden onder ‘Projectinfo’ in de magicplan-app.
-            </p>
+            {file ? (
+              <p className="text-xs font-medium">Gekozen bestand: {file.name}</p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Te vinden onder ‘Exporteer’ in de 3D Scanner App.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Button type="submit" size="lg" disabled={pending}>
-              {pending ? "Importeren…" : "Importeren →"}
+              {pending ? "Importeren…" : "Ruimte importeren →"}
             </Button>
             <Button
               type="button"
@@ -159,10 +183,18 @@ export function LidarImport({ projectId }: { projectId: string }) {
               Terug naar instructies
             </Button>
           </div>
+
+          <p className="text-xs text-muted-foreground">
+            Nauwkeurigheid: ±1-2 cm (Apple RoomPlan LiDAR)
+          </p>
         </form>
       )}
     </div>
   );
+}
+
+function isJsonFile(file: File): boolean {
+  return file.name.toLowerCase().endsWith(".json");
 }
 
 function ImportSuccess({
@@ -174,23 +206,16 @@ function ImportSuccess({
   result: RoomDimensions;
   onContinue: () => void;
 }) {
-  const { dimensions, walls, accuracy, source } = result;
+  const { dimensions, walls, accuracy } = result;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">Scan geïmporteerd ✅</h1>
         <p className="text-sm text-muted-foreground">
-          We hebben de plattegrond opgehaald en aan je project gekoppeld.
+          We hebben je RoomPlan-scan verwerkt en aan je project gekoppeld.
         </p>
       </div>
-
-      {source === "mock" ? (
-        <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Testdata — er is nog geen magicplan-API-sleutel ingesteld, dus dit is
-          een voorbeeldscan.
-        </p>
-      ) : null}
 
       <div className="grid gap-6 sm:grid-cols-[minmax(0,320px)_1fr]">
         <RoomDiagramSVG walls={walls} className="w-full rounded-xl border border-border" />
@@ -229,20 +254,20 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Placeholder mark — magicplan has not given us brand assets to ship yet. */
-function MagicplanLogo() {
+/** Placeholder badge — no App Store artwork is licensed into the repo yet. */
+function AppStoreBadge() {
   return (
     <div className="flex w-fit items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
       <span
         aria-hidden
         className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-xl"
       >
-        📐
+        📱
       </span>
       <div className="flex flex-col">
-        <span className="text-sm font-semibold">magicplan</span>
+        <span className="text-sm font-semibold">3D Scanner App</span>
         <span className="text-xs text-muted-foreground">
-          LiDAR-scan · gratis account
+          Laan Labs · gratis · Apple RoomPlan
         </span>
       </div>
     </div>

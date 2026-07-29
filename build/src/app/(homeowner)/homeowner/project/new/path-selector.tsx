@@ -72,9 +72,9 @@ export function PathSelector({ lidarLikely }: { lidarLikely: boolean }) {
         <PathCard
           icon="📱"
           title="LiDAR scan"
-          subtitle="iPhone 12 Pro+ of iPad Pro"
-          badge="Nauwkeurigheid ±1-2 cm"
-          cta="Scan met magicplan →"
+          subtitle="iPhone 12 Pro+ of iPad Pro · Gratis app"
+          badge="Nauwkeurigheid ±1-2 cm · Apple RoomPlan"
+          cta="Scan met 3D Scanner App →"
           recommended={lidarLikely}
           primary={lidarLikely}
           pending={pending === "lidar"}
