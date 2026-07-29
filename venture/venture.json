@@ -6,13 +6,14 @@
   "created": "2026-07-29",
   "last_updated": "2026-07-29",
   "constraints": {
-    "max_cash_before_first_customer_eur": 5000,
-    "max_build_weeks": 8,
+    "max_cash_before_first_customer_eur": 6000,
+    "max_build_weeks": 12,
     "max_weekly_hours_baseline": 20,
     "max_weekly_hours_surge": 35,
     "first_paying_customer_deadline": "2026-10-31",
     "max_ventures_stages_5_to_9": 1,
-    "max_ventures_stages_1_to_4": 2
+    "max_ventures_stages_1_to_4": 2,
+    "budget_override_note": "Founder expanded budget from \u20ac5,000 to \u20ac6,000 and build window from 8 to 12 weeks on 2026-07-29."
   },
   "gate_inputs": {
     "founder_has_problem": true,
@@ -90,8 +91,15 @@
       "decision": "OVERRIDE",
       "date": "2026-07-29",
       "note": "Founder explicitly overrode Stage 3 customer validation. evidence_debt=true. Risk accepted in writing."
+    },
+    {
+      "stage": 4,
+      "decision": "PROCEED",
+      "date": "2026-07-29",
+      "note": "PRD complete. Full MVP scope defined: LiDAR scan + manual fallback, floor plan, elevations, 3D viewer, 3 AI renders (Flux Kontext + Ultra + Magnific), contractor matching, messaging, reviews, payments, estate agent B2B, Decodata catalog, trilingual. 12 weeks, \u20ac6,000."
     }
   ],
   "evidence_debt": true,
-  "evidence_debt_note": "Stage 3 (Customer Validation) overridden by founder. E2 contractor willingness-to-pay not collected. Must be collected in parallel with Stage 4 build. Kill criterion: zero contractor payment by first customer deadline 2026-10-31."
+  "evidence_debt_note": "Stage 3 (Customer Validation) overridden by founder. E2 contractor willingness-to-pay not collected. Must be collected in parallel with Stage 4 build. Kill criterion: zero contractor payment by first customer deadline 2026-10-31.",
+  "prd_complete": true
 }
