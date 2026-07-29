@@ -4,7 +4,7 @@
   "stage": 6,
   "status": "active",
   "created": "2026-07-29",
-  "last_updated": "2026-07-29",
+  "last_updated": "2026-07-30",
   "constraints": {
     "max_cash_before_first_customer_eur": 6000,
     "max_build_weeks": 12,
@@ -163,5 +163,15 @@
     "rls_policies": 24,
     "status": "live",
     "connected": "2026-07-29"
+  },
+  "production_url": "https://slimruimte.vercel.app",
+  "vercel": {
+    "project": "hanane7/slimruimte",
+    "project_id": "prj_aQKfunXAWtAkuZuDPFs2mcEtjLGM",
+    "production_url": "https://slimruimte.vercel.app",
+    "framework": "nextjs",
+    "deployed": "2026-07-30",
+    "routes_live": 22,
+    "github_autodeploy": "pending \u2014 install github.com/apps/vercel manually"
   }
 }
