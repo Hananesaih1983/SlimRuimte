@@ -153,5 +153,15 @@
       "commit": "46dd611",
       "date": "2026-07-29"
     }
-  ]
+  ],
+  "supabase": {
+    "project_ref": "uiqsagwikywgeiyunypg",
+    "region": "North EU (Stockholm)",
+    "url": "https://uiqsagwikywgeiyunypg.supabase.co",
+    "migration": "20260729000001_init.sql",
+    "tables_verified": 12,
+    "rls_policies": 24,
+    "status": "live",
+    "connected": "2026-07-29"
+  }
 }
