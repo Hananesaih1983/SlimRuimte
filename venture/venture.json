@@ -1,7 +1,7 @@
 {
   "venture": "SlimRuimte",
   "slug": "slimruimte",
-  "stage": 4,
+  "stage": 5,
   "status": "active",
   "created": "2026-07-29",
   "last_updated": "2026-07-29",
@@ -97,9 +97,16 @@
       "decision": "PROCEED",
       "date": "2026-07-29",
       "note": "PRD complete. Full MVP scope defined: LiDAR scan + manual fallback, floor plan, elevations, 3D viewer, 3 AI renders (Flux Kontext + Ultra + Magnific), contractor matching, messaging, reviews, payments, estate agent B2B, Decodata catalog, trilingual. 12 weeks, \u20ac6,000."
+    },
+    {
+      "stage": 5,
+      "decision": "ACTIVE",
+      "date": "2026-07-29",
+      "note": "Stage 5 UX started. Producing user flows, screen states, and actual copy for all 13 MVP features."
     }
   ],
   "evidence_debt": true,
   "evidence_debt_note": "Stage 3 (Customer Validation) overridden by founder. E2 contractor willingness-to-pay not collected. Must be collected in parallel with Stage 4 build. Kill criterion: zero contractor payment by first customer deadline 2026-10-31.",
-  "prd_complete": true
+  "prd_complete": true,
+  "ux_complete": true
 }
