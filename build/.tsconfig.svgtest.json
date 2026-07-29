@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outDir": ".svgtest",
+    "module": "commonjs",
+    "target": "es2022",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] }
+  },
+  "files": ["src/components/scan/RoomDiagramSVG.tsx"]
+}
