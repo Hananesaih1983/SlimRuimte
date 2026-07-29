@@ -1,11 +1,10 @@
 {
   "venture": "SlimRuimte",
   "slug": "slimruimte",
-  "stage": 1,
-  "status": "awaiting_human",
+  "stage": 3,
+  "status": "active",
   "created": "2026-07-29",
   "last_updated": "2026-07-29",
-
   "constraints": {
     "max_cash_before_first_customer_eur": 5000,
     "max_build_weeks": 8,
@@ -15,7 +14,6 @@
     "max_ventures_stages_5_to_9": 1,
     "max_ventures_stages_1_to_4": 2
   },
-
   "gate_inputs": {
     "founder_has_problem": true,
     "founder_domain_score": 3,
@@ -23,23 +21,24 @@
     "risk_tolerance": "aggressive",
     "risk_tolerance_threshold": 3.0
   },
-
   "tech_stack": {
-    "rendering": "Flux 1.1 Pro API (~€0.03-0.05/image)",
+    "rendering": "Flux 1.1 Pro API (~\u20ac0.03-0.05/image)",
     "room_analysis": "GPT-4o vision / iPhone LiDAR",
     "floor_plan": "Planner5D API (white-label) or Decodata partnership",
-    "platform": "Next.js + Supabase + Vercel (<€80/month)",
+    "platform": "Next.js + Supabase + Vercel (<\u20ac80/month)",
     "payments": "Stripe Connect or Mollie Connect (lead fees, no escrow)"
   },
-
   "revenue_model": {
     "b2c": "Free for homeowners",
     "b2b_lead_fee": 35,
     "b2b_contractors_per_project": 3,
     "gross_per_project_eur": 105,
-    "secondary": ["affiliate commissions on rendered furniture SKUs", "premium contractor subscription €49/month", "estate agent scan fee €19-49/property"]
+    "secondary": [
+      "affiliate commissions on rendered furniture SKUs",
+      "premium contractor subscription \u20ac49/month",
+      "estate agent scan fee \u20ac19-49/property"
+    ]
   },
-
   "market_model": {
     "nl_renovation_events_yr": 623000,
     "be_renovation_events_yr": 449000,
@@ -49,19 +48,42 @@
     "platform_share_y3": 0.025,
     "y1_gross_revenue_eur": 253000,
     "y3_gross_revenue_eur": 1268000,
-    "assumptions_tier_a": ["digital_discovery_rate", "platform_share_y1", "platform_share_y3", "lead_fee_35"]
+    "assumptions_tier_a": [
+      "digital_discovery_rate",
+      "platform_share_y1",
+      "platform_share_y3",
+      "lead_fee_35"
+    ]
   },
-
   "kill_criteria": [
     "Under 30% problem confirmation across 12+ contractor interviews",
     "Zero contractor confirms willingness to pay premium lead fee after 25 qualified contacts",
-    "Budget exceeded by more than 25% (>€6,250)",
+    "Budget exceeded by more than 25% (>\u20ac6,250)",
     "Build duration exceeded by more than 50% (>12 weeks)",
     "No paying customer by 2026-10-31 AND re-gate score under 3.0",
     "Regulatory blocker with no legal path",
-    "Six consecutive weeks without available hours → freeze, not kill"
+    "Six consecutive weeks without available hours \u2192 freeze, not kill"
   ],
-
   "evidence_file": "venture/evidence.jsonl",
-  "gap_ledger": "venture/00_gap_ledger.jsonl"
+  "gap_ledger": "venture/00_gap_ledger.jsonl",
+  "stage_history": [
+    {
+      "stage": 0,
+      "decision": "PROCEED",
+      "date": "2026-07-29",
+      "note": "Industry gap scan complete \u2014 8 gaps identified, gap_006+gap_008 selected"
+    },
+    {
+      "stage": 1,
+      "decision": "PROCEED",
+      "date": "2026-07-29",
+      "note": "Opportunity discovery complete \u2014 all exit criteria passed"
+    },
+    {
+      "stage": 2,
+      "decision": "BUILD",
+      "date": "2026-07-29",
+      "note": "Gate score 4.10/5.0 (threshold 3.0 aggressive), confidence 90%, human signed off"
+    }
+  ]
 }
