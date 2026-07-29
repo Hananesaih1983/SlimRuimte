@@ -123,5 +123,35 @@
     "estate_agent",
     "admin"
   ],
-  "multi_project": true
+  "multi_project": true,
+  "build_log": [
+    {
+      "week": 1,
+      "milestone": "Foundation",
+      "features": [
+        "Supabase client/server/middleware (SSR-safe)",
+        "Auth callback route /auth/callback (session exchange)",
+        "Login + Register pages with 5-role selector",
+        "Middleware: ALL routes matched, role-based routing",
+        "Role read from public.users DB (not user_metadata \u2014 security)",
+        "prevent_role_change trigger (blocks privilege escalation)",
+        "DB migration: 12 tables + 24 RLS policies",
+        "handle_new_user() trigger (prevents FK gap)",
+        "5 role-based route groups + dashboards",
+        "Role dispatcher at /dashboard",
+        "next-intl: nl/en/fr, cookie-based (no URL segment)",
+        ".env.local.example (39 vars)",
+        "vercel.json"
+      ],
+      "build_passed": true,
+      "security_notes": [
+        "Role from public.users, not user_metadata (self-writable)",
+        "prevent_role_change trigger in DB",
+        "contractor_read USING(TRUE) exposes stripe_account_id \u2014 move to private table before launch",
+        "No URL locale segment yet \u2014 decision needed before Week 11 i18n pass"
+      ],
+      "commit": "46dd611",
+      "date": "2026-07-29"
+    }
+  ]
 }
