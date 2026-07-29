@@ -1,7 +1,7 @@
 {
   "venture": "SlimRuimte",
   "slug": "slimruimte",
-  "stage": 5,
+  "stage": 6,
   "status": "active",
   "created": "2026-07-29",
   "last_updated": "2026-07-29",
@@ -103,10 +103,25 @@
       "decision": "ACTIVE",
       "date": "2026-07-29",
       "note": "Stage 5 UX started. Producing user flows, screen states, and actual copy for all 13 MVP features."
+    },
+    {
+      "stage": 6,
+      "decision": "ACTIVE",
+      "date": "2026-07-29",
+      "note": "Architecture complete. 5 roles, multi-project, full data model with RLS, 8 dependency failure modes, cost model at 10/100/1000 users. Build recommendation: Claude Code + 60h part-time developer."
     }
   ],
   "evidence_debt": true,
   "evidence_debt_note": "Stage 3 (Customer Validation) overridden by founder. E2 contractor willingness-to-pay not collected. Must be collected in parallel with Stage 4 build. Kill criterion: zero contractor payment by first customer deadline 2026-10-31.",
   "prd_complete": true,
-  "ux_complete": true
+  "ux_complete": true,
+  "architecture_complete": true,
+  "roles": [
+    "homeowner",
+    "contractor",
+    "interior_designer",
+    "estate_agent",
+    "admin"
+  ],
+  "multi_project": true
 }
