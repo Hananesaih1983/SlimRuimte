@@ -1,0 +1,72 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "profile": "Profile",
+    "logout": "Log out"
+  },
+  "auth": {
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "login": {
+      "title": "Log in",
+      "subtitle": "Log in to your SlimRuimte account.",
+      "submit": "Log in",
+      "magicLink": "Email me a login link",
+      "magicLinkSent": "We've sent you a login link. Check your inbox.",
+      "noAccount": "No account yet?",
+      "registerLink": "Create an account"
+    },
+    "register": {
+      "title": "Create an account",
+      "chooseRole": "What will you use SlimRuimte for?",
+      "chooseRoleHelp": "Your role determines what you see. You can't change it yourself later.",
+      "back": "Pick a different role",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "checkEmail": "Confirm your email address",
+      "checkEmailBody": "We've sent a confirmation link to {email}. Click it to activate your account."
+    },
+    "errors": {
+      "authFailed": "Login failed. The link has expired or was already used.",
+      "missingRole": "Your account has no role yet. Please contact support.",
+      "invalidCredentials": "That email address or password is incorrect.",
+      "roleRequired": "Choose a role first."
+    }
+  },
+  "roles": {
+    "homeowner": {
+      "name": "Homeowner",
+      "description": "I want to renovate my home"
+    },
+    "contractor": {
+      "name": "Contractor",
+      "description": "I carry out renovations"
+    },
+    "interior_designer": {
+      "name": "Interior designer",
+      "description": "I design interiors"
+    },
+    "estate_agent": {
+      "name": "Estate agent",
+      "description": "I sell or let properties"
+    },
+    "admin": {
+      "name": "Administrator",
+      "description": "Platform administration"
+    }
+  },
+  "dashboard": {
+    "signedInAs": "Signed in as",
+    "yourRole": "Your role"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "common": {
+    "welcome": "Welkom",
+    "loading": "Laden…",
+    "error": "Er is iets misgegaan",
+    "save": "Opslaan",
+    "cancel": "Annuleren"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projecten",
+    "profile": "Profiel",
+    "logout": "Uitloggen"
+  },
+  "auth": {
+    "emailLabel": "E-mailadres",
+    "passwordLabel": "Wachtwoord",
+    "login": {
+      "title": "Inloggen",
+      "subtitle": "Log in op je SlimRuimte-account.",
+      "submit": "Inloggen",
+      "magicLink": "Stuur me een inloglink",
+      "magicLinkSent": "We hebben je een inloglink gestuurd. Controleer je inbox.",
+      "noAccount": "Nog geen account?",
+      "registerLink": "Account aanmaken"
+    },
+    "register": {
+      "title": "Account aanmaken",
+      "chooseRole": "Waarvoor gebruik je SlimRuimte?",
+      "chooseRoleHelp": "Je rol bepaalt wat je ziet. Je kunt dit later niet zelf wijzigen.",
+      "back": "Andere rol kiezen",
+      "passwordHint": "Minimaal 8 tekens.",
+      "submit": "Account aanmaken",
+      "haveAccount": "Heb je al een account?",
+      "loginLink": "Inloggen",
+      "checkEmail": "Bevestig je e-mailadres",
+      "checkEmailBody": "We hebben een bevestigingslink gestuurd naar {email}. Klik erop om je account te activeren."
+    },
+    "errors": {
+      "authFailed": "Inloggen mislukt. De link is verlopen of al gebruikt.",
+      "missingRole": "Je account heeft nog geen rol. Neem contact op met support.",
+      "invalidCredentials": "E-mailadres of wachtwoord klopt niet.",
+      "roleRequired": "Kies eerst een rol."
+    }
+  },
+  "roles": {
+    "homeowner": {
+      "name": "Huiseigenaar",
+      "description": "Ik wil mijn woning verbouwen"
+    },
+    "contractor": {
+      "name": "Aannemer",
+      "description": "Ik voer verbouwingen uit"
+    },
+    "interior_designer": {
+      "name": "Interieurontwerper",
+      "description": "Ik ontwerp interieurs"
+    },
+    "estate_agent": {
+      "name": "Makelaar",
+      "description": "Ik verkoop of verhuur woningen"
+    },
+    "admin": {
+      "name": "Beheerder",
+      "description": "Platformbeheer"
+    }
+  },
+  "dashboard": {
+    "signedInAs": "Ingelogd als",
+    "yourRole": "Jouw rol"
+  }
+}

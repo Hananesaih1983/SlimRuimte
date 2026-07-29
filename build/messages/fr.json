@@ -1,0 +1,72 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "loading": "Chargement…",
+    "error": "Une erreur est survenue",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "projects": "Projets",
+    "profile": "Profil",
+    "logout": "Se déconnecter"
+  },
+  "auth": {
+    "emailLabel": "Adresse e-mail",
+    "passwordLabel": "Mot de passe",
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Connectez-vous à votre compte SlimRuimte.",
+      "submit": "Se connecter",
+      "magicLink": "M'envoyer un lien de connexion",
+      "magicLinkSent": "Nous vous avons envoyé un lien de connexion. Vérifiez votre boîte de réception.",
+      "noAccount": "Pas encore de compte ?",
+      "registerLink": "Créer un compte"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "chooseRole": "Pour quoi utiliserez-vous SlimRuimte ?",
+      "chooseRoleHelp": "Votre rôle détermine ce que vous voyez. Vous ne pourrez pas le modifier vous-même.",
+      "back": "Choisir un autre rôle",
+      "passwordHint": "Au moins 8 caractères.",
+      "submit": "Créer le compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "loginLink": "Se connecter",
+      "checkEmail": "Confirmez votre adresse e-mail",
+      "checkEmailBody": "Nous avons envoyé un lien de confirmation à {email}. Cliquez dessus pour activer votre compte."
+    },
+    "errors": {
+      "authFailed": "Échec de la connexion. Le lien a expiré ou a déjà été utilisé.",
+      "missingRole": "Votre compte n'a pas encore de rôle. Contactez le support.",
+      "invalidCredentials": "Cette adresse e-mail ou ce mot de passe est incorrect.",
+      "roleRequired": "Choisissez d'abord un rôle."
+    }
+  },
+  "roles": {
+    "homeowner": {
+      "name": "Propriétaire",
+      "description": "Je souhaite rénover mon logement"
+    },
+    "contractor": {
+      "name": "Entrepreneur",
+      "description": "Je réalise des rénovations"
+    },
+    "interior_designer": {
+      "name": "Architecte d'intérieur",
+      "description": "Je conçois des intérieurs"
+    },
+    "estate_agent": {
+      "name": "Agent immobilier",
+      "description": "Je vends ou loue des biens"
+    },
+    "admin": {
+      "name": "Administrateur",
+      "description": "Administration de la plateforme"
+    }
+  },
+  "dashboard": {
+    "signedInAs": "Connecté en tant que",
+    "yourRole": "Votre rôle"
+  }
+}
