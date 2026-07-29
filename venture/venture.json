@@ -1,7 +1,7 @@
 {
   "venture": "SlimRuimte",
   "slug": "slimruimte",
-  "stage": 3,
+  "stage": 4,
   "status": "active",
   "created": "2026-07-29",
   "last_updated": "2026-07-29",
@@ -84,6 +84,14 @@
       "decision": "BUILD",
       "date": "2026-07-29",
       "note": "Gate score 4.10/5.0 (threshold 3.0 aggressive), confidence 90%, human signed off"
+    },
+    {
+      "stage": 3,
+      "decision": "OVERRIDE",
+      "date": "2026-07-29",
+      "note": "Founder explicitly overrode Stage 3 customer validation. evidence_debt=true. Risk accepted in writing."
     }
-  ]
+  ],
+  "evidence_debt": true,
+  "evidence_debt_note": "Stage 3 (Customer Validation) overridden by founder. E2 contractor willingness-to-pay not collected. Must be collected in parallel with Stage 4 build. Kill criterion: zero contractor payment by first customer deadline 2026-10-31."
 }
