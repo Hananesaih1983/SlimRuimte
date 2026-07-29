@@ -297,7 +297,7 @@ These are explicitly excluded. No engineer should build them.
 | 3D viewer | `<model-viewer>` web component | Free (Google) | Works everywhere, no licence |
 | 3D generation | Python trimesh (server function) | Free | Parametric room mesh from dimensions |
 | Elevation SVG | Python svgwrite | Free | Deterministic 2D technical drawings |
-| Floor plan (LiDAR) | magicplan REST API | ~$300/mo (10 projects) | Full LiDAR → SVG/DXF/OBJ pipeline |
+| Floor plan (LiDAR) | Apple RoomPlan via "3D Scanner App" (free iOS app) + Room.json file upload | €0/month | User exports Room.json from free app → uploads to SlimRuimte → backend parses to SVG/DXF. Replaces magicplan ($300/month). v2: own white-label iOS app (~€2,000-3,000 one-time) |
 | Floor plan (manual) | Custom in-app wizard → svgwrite | Free | Tape/laser measurement → SVG |
 | Render gen 1 | Flux Kontext Pro via FAL.ai | $0.04/render | img2img: room photo → styled render |
 | Render gen 2+3 | Flux 1.1 Pro Ultra via FAL.ai | $0.06/render | Highest photorealism, 4MP output |
@@ -336,7 +336,7 @@ These are explicitly excluded. No engineer should build them.
 
 | Cost item | 10 projects/mo | 100 projects/mo | 1,000 projects/mo |
 |-----------|---------------|-----------------|------------------|
-| magicplan API | $300 | $300 (included) | ~$1,500 (negotiate volume) |
+| magicplan API | REPLACED — €0 (RoomPlan file upload) | €0 | €0 |
 | Flux renders (3/project) | $1.50 | $15 | $150 |
 | Magnific (10% uptake) | $0.60 | $6 | $60 |
 | Twilio (3 msgs/project) | $1.50 | $15 | $150 |
