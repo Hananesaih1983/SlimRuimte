@@ -194,5 +194,24 @@
     "moodboard_images"
   ],
   "migration_003_status": "applied \u2014 2026-07-30",
-  "screens_total": 23
+  "screens_total": 23,
+  "stripe": {
+    "mode": "test",
+    "account_id": "acct_1TxvmTAKkj8LZeVQ",
+    "products": {
+      "lead_fee": "prod_UylyKFbr47o1KH",
+      "starter": "prod_UylyGJFgSQcmso",
+      "professional": "prod_UylyxmLz5FMb3q",
+      "expert": "prod_UylyqDaLMppNSV"
+    },
+    "prices": {
+      "lead_fee_eur35": "price_1TyoQtAKkj8LZeVQzvZuHMRM",
+      "designer_lead_eur25": "price_1TyoQuAKkj8LZeVQ9fk4sKFL",
+      "starter_monthly_eur99": "price_1TyoQuAKkj8LZeVQFspk1Pvp",
+      "professional_monthly_eur199": "price_1TyoQvAKkj8LZeVQhqkudIvK",
+      "expert_monthly_eur299": "price_1TyoQvAKkj8LZeVQm4HGNkKn"
+    },
+    "webhook_secret": "pending \u2014 configure in Stripe dashboard",
+    "connect_needed": "Week 8 \u2014 Stripe Connect for contractor payouts"
+  }
 }
