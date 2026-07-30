@@ -2,7 +2,7 @@
   "venture": "SlimRuimte",
   "slug": "slimruimte",
   "stage": 6,
-  "status": "active",
+  "status": "frozen",
   "created": "2026-07-29",
   "last_updated": "2026-07-30",
   "constraints": {
@@ -213,5 +213,9 @@
     },
     "webhook_secret": "pending \u2014 configure in Stripe dashboard",
     "connect_needed": "Week 8 \u2014 Stripe Connect for contractor payouts"
-  }
+  },
+  "paused_at": "2026-07-30T20:00:00+02:00",
+  "pause_snapshot": "venture/pause_snapshot.md",
+  "pause_commit": "3541510",
+  "pause_reason": "Founder paused after competitor observation (Home Planner ecosystem). Rescue plan written \u2014 B2B opname pivot under evaluation. Mandatory next action: 20-contractor outreach test (Vector 1) before any further build."
 }
