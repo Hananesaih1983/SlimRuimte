@@ -61,7 +61,15 @@ export function opposingWallsMatch(
  */
 export function computeFootprint(walls: Wall[], height?: number): RoomFootprint {
   const byId = new Map(walls.map((wall) => [wall.id, wall]));
-  const lengthOf = (id: WallId) => byId.get(id)?.length ?? 0;
+
+  // Unmeasured walls carry NaN (see `blankWalls`), and `?? 0` does not catch
+  // that — NaN is neither null nor undefined. Without the finite check a single
+  // empty input poisons every derived number and the review screen renders
+  // "NaN m²" instead of a partial footprint.
+  const lengthOf = (id: WallId) => {
+    const length = byId.get(id)?.length;
+    return isFiniteNumber(length) ? length : 0;
+  };
 
   const width = roundCm((lengthOf("N") + lengthOf("S")) / 2);
   const depth = roundCm((lengthOf("E") + lengthOf("W")) / 2);
