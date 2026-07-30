@@ -30,6 +30,12 @@ export class MockDatabase {
   tables = new Map<string, Row[]>();
   /** Set to force the next write to fail, exercising the 500 branches. */
   failNextWrite: { message: string } | null = null;
+  /**
+   * Set to force the next read to fail — a dropped connection, a statement
+   * timeout. Pages that ignore the `error` field render this as "you have no
+   * data", which is the failure mode worth testing for.
+   */
+  failNextRead: { message: string } | null = null;
   /** 1-based index of the write to fail, for routes that write more than once. */
   failWriteAt: number | null = null;
   writeCount = 0;
@@ -86,6 +92,12 @@ class MockQuery implements PromiseLike<{ data: unknown; error: unknown }> {
   }
 
   private run(): { data: Row[]; error: unknown } {
+    if (this.op === "select" && this.db.failNextRead) {
+      const error = this.db.failNextRead;
+      this.db.failNextRead = null;
+      return { data: [], error };
+    }
+
     if (this.op !== "select") {
       this.db.writeCount += 1;
 

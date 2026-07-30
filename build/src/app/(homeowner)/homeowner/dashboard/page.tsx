@@ -22,7 +22,7 @@ export default async function HomeownerDashboardPage() {
 
   // RLS (`project_owner`) already scopes this to the caller; the explicit
   // homeowner_id filter keeps the index on (homeowner_id, status, created_at).
-  const { data: projects } = await supabase
+  const { data: projects, error } = await supabase
     .from("projects")
     .select("id, title, status, renovation_type, scan_method, created_at")
     .eq("homeowner_id", user.id)
@@ -38,7 +38,7 @@ export default async function HomeownerDashboardPage() {
       <section className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Mijn projecten</h2>
-          {rows.length > 0 ? (
+          {error || rows.length > 0 ? (
             <Link
               href="/homeowner/project/new"
               className={buttonVariants({ size: "lg" })}
@@ -48,7 +48,18 @@ export default async function HomeownerDashboardPage() {
           ) : null}
         </div>
 
-        {rows.length === 0 ? (
+        {/* A failed query must never render as the empty state. "Nog geen
+            projecten" to a homeowner who has three of them reads as data loss
+            and invites them to scan the same room again. */}
+        {error ? (
+          <p
+            role="alert"
+            className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          >
+            Je projecten konden niet worden geladen. Vernieuw de pagina — je
+            projecten zijn niet verdwenen.
+          </p>
+        ) : rows.length === 0 ? (
           <EmptyState
             icon="📐"
             title="Nog geen projecten"

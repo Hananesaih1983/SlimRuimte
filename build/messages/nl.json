@@ -39,6 +39,7 @@
     "errors": {
       "authFailed": "Inloggen mislukt. De link is verlopen of al gebruikt.",
       "missingRole": "Je account heeft nog geen rol. Neem contact op met support.",
+      "roleMismatch": "Je rol is gewijzigd sinds je laatste keer inloggen. Log opnieuw in om verder te gaan.",
       "invalidCredentials": "E-mailadres of wachtwoord klopt niet.",
       "roleRequired": "Kies eerst een rol."
     }

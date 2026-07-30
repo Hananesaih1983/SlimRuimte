@@ -16,18 +16,46 @@ import { clearDraft, patchDraft } from "@/lib/scan/wizard-storage";
  * Choosing a path creates the project row first (`/api/projects/create`) and
  * then forwards its id, so every downstream step has somewhere to save and an
  * abandoned scan leaves a resumable draft on the dashboard.
+ *
+ * UNLESS `existingProjectId` is set. The project detail page links here for a
+ * project that has no dimensions yet ("Ruimte scannen →"), and creating a row
+ * there produced a SECOND project every time: the homeowner ended up with
+ * orphaned drafts on their dashboard, the scan never attached to the project
+ * they opened, and each attempt ate one of their five MVP project slots.
  */
 
 type Path = "lidar" | "manual";
 
-export function PathSelector({ lidarLikely }: { lidarLikely: boolean }) {
+export function PathSelector({
+  lidarLikely,
+  existingProjectId,
+}: {
+  lidarLikely: boolean;
+  existingProjectId?: string;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState<Path | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  function open(path: Path, projectId: string) {
+    // Whichever project we are about to measure, a half-finished draft for a
+    // different one is stale.
+    clearDraft();
+    patchDraft({ projectId });
+
+    router.push(
+      `/homeowner/project/new/${path}?projectId=${encodeURIComponent(projectId)}`,
+    );
+  }
+
   async function start(path: Path) {
     setError(null);
     setPending(path);
+
+    if (existingProjectId) {
+      open(path, existingProjectId);
+      return;
+    }
 
     try {
       const response = await fetch("/api/projects/create", {
@@ -44,13 +72,7 @@ export function PathSelector({ lidarLikely }: { lidarLikely: boolean }) {
         return;
       }
 
-      // A fresh project means any half-finished wizard draft is stale.
-      clearDraft();
-      patchDraft({ projectId: payload.projectId });
-
-      router.push(
-        `/homeowner/project/new/${path}?projectId=${encodeURIComponent(payload.projectId)}`,
-      );
+      open(path, payload.projectId);
     } catch {
       setError("Geen verbinding. Controleer je internet en probeer het opnieuw.");
       setPending(null);

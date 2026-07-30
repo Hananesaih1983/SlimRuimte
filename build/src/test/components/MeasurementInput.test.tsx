@@ -241,13 +241,22 @@ describe("MeasurementInput", () => {
      *
      * The wizard's onChange is `updateWall({ length: roundCm(value) })`, and
      * `roundCm` (Math.round(v * 100) / 100) and `Number#toFixed(2)` do not agree
-     * on every input: 4.205 is 4.20499999999999996 in IEEE-754, so roundCm gives
-     * 4.20 while toFixed gives "4.21". Formatting the blur from the local text
-     * instead of from the prop therefore lets the field display 4.21 cm while
-     * the saved wall — and the floor plan, the PDF and the contractor brief
-     * built from it — say 4.20.
+     * on every input. 2.675 is 2.67499999999999982 in IEEE-754, but
+     * `2.675 * 100` rounds UP to exactly 270.5... — near enough that the two
+     * functions land on different centimetres:
+     *
+     *   roundCm(2.675)       -> 2.68   (what gets saved)
+     *   (2.675).toFixed(2)   -> "2.67" (what the raw text formats to)
+     *
+     * Formatting the blur from the local text instead of from the prop
+     * therefore lets the field display 2.67 m while the saved wall — and the
+     * floor plan, the PDF and the contractor brief built from it — say 2.68 m.
      *
      * One centimetre, but it is the one number this whole product sells.
+     *
+     * (An earlier version of this test used 4.205, where roundCm and toFixed
+     * both give 4.21 — no disagreement, so it asserted a premise that
+     * `geometry.test.ts` already contradicts. 2.675 is a real divergence.)
      */
     it("shows the value the parent stored, not the raw text, when the two round differently", () => {
       function Harness() {
@@ -265,12 +274,12 @@ describe("MeasurementInput", () => {
       const input = screen.getByLabelText("Muur Noord") as HTMLInputElement;
 
       fireEvent.focus(input);
-      type(input, "4.205");
+      type(input, "2.675");
       fireEvent.blur(input);
 
-      expect(roundCm(4.205)).toBe(4.2);
-      expect((4.205).toFixed(2)).toBe("4.21");
-      expect(input.value).toBe("4.20");
+      expect(roundCm(2.675)).toBe(2.68);
+      expect((2.675).toFixed(2)).toBe("2.67");
+      expect(input.value).toBe("2.68");
     });
 
     it("resyncs when the parent changes the value while unfocused", () => {

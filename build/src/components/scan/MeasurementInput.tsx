@@ -108,7 +108,23 @@ export function MeasurementInput({
           onBlur={() => {
             focused.current = false;
             const parsed = Number.parseFloat(text.trim());
-            setText(Number.isFinite(parsed) ? parsed.toFixed(2) : formatValue(value));
+
+            if (!Number.isFinite(parsed)) {
+              setText(formatValue(value));
+              return;
+            }
+
+            // Snap to what the parent STORED, not to the raw text. The two do
+            // not always agree: the wizard stores roundCm(2.675) = 2.68 while
+            // (2.675).toFixed(2) is "2.67", so formatting the blur from the
+            // text alone lets the field show a centimetre the floor plan, the
+            // PDF and the contractor brief will never contain.
+            // Falls back to the text when the parent has not echoed a value.
+            setText(
+              value !== null && Number.isFinite(value)
+                ? formatValue(value)
+                : parsed.toFixed(2),
+            );
           }}
           onChange={(event) => handleChange(event.target.value)}
           className={cn(

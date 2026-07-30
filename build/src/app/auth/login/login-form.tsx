@@ -7,6 +7,13 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
+/** `?error=` codes the app redirects here with, mapped to their message key. */
+const ERROR_MESSAGE_KEY: Record<string, string> = {
+  auth_failed: "errors.authFailed",
+  missing_role: "errors.missingRole",
+  role_mismatch: "errors.roleMismatch",
+};
+
 /** Only allow same-origin, absolute-path redirects (no open redirect). */
 function safeRedirect(target: string | undefined): string {
   if (!target || !target.startsWith("/") || target.startsWith("//")) {
@@ -29,12 +36,9 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const messageKey = initialError ? ERROR_MESSAGE_KEY[initialError] : undefined;
   const [error, setError] = useState<string | null>(
-    initialError === "auth_failed"
-      ? t("errors.authFailed")
-      : initialError === "missing_role"
-        ? t("errors.missingRole")
-        : null,
+    messageKey ? t(messageKey) : null,
   );
 
   const destination = safeRedirect(redirectTo);

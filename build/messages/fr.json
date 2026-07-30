@@ -39,6 +39,7 @@
     "errors": {
       "authFailed": "Échec de la connexion. Le lien a expiré ou a déjà été utilisé.",
       "missingRole": "Votre compte n'a pas encore de rôle. Contactez le support.",
+      "roleMismatch": "Votre rôle a changé depuis votre dernière connexion. Reconnectez-vous pour continuer.",
       "invalidCredentials": "Cette adresse e-mail ou ce mot de passe est incorrect.",
       "roleRequired": "Choisissez d'abord un rôle."
     }

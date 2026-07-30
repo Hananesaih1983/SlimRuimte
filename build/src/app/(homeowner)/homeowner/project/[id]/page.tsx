@@ -27,7 +27,7 @@ export default async function ProjectDetailPage({
   if (!isUuid(id)) notFound();
 
   const supabase = await createClient();
-  const { data: project } = await supabase
+  const { data: project, error } = await supabase
     .from("projects")
     .select(
       "id, title, status, renovation_type, postcode, country, scan_method, scan_source, magicplan_project_id, room_dimensions, created_at",
@@ -36,6 +36,12 @@ export default async function ProjectDetailPage({
     .eq("homeowner_id", user.id)
     .is("deleted_at", null)
     .maybeSingle();
+
+  // A dropped connection is not a missing project. 404-ing on it would tell a
+  // homeowner their project no longer exists; `error.tsx` offers a retry.
+  if (error) {
+    throw new Error(`Kon project ${id} niet laden: ${error.message}`);
+  }
 
   if (!project) notFound();
 

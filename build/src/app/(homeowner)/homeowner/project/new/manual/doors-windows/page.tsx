@@ -280,6 +280,19 @@ function OpeningForm({
   const [offset, setOffset] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Round on the way IN, not only at submit.
+   *
+   * `submit` stores `roundCm(width)`, and MeasurementInput redisplays whatever
+   * this state holds. Keeping the raw value here lets the field show 2.67 while
+   * the opening saved as 2.68 (see MeasurementInput.test.tsx). Rounding here
+   * makes displayed and stored identical, and matches the wall step, which
+   * already rounds in its onChange.
+   */
+  const store =
+    (set: (value: number | null) => void) => (value: number | null) =>
+      set(value === null ? null : roundCm(value));
+
   function submit() {
     if (!isFiniteNumber(width) || width <= 0) {
       setError("Vul een geldige breedte in.");
@@ -313,12 +326,18 @@ function OpeningForm({
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-muted/30 p-4">
       <p className="text-sm font-medium">{KIND_LABEL[kind]} toevoegen</p>
 
-      <MeasurementInput label="Breedte" value={width} onChange={setWidth} min={0.1} autoFocus />
-      <MeasurementInput label="Hoogte" value={height} onChange={setHeight} min={0.1} />
+      <MeasurementInput
+        label="Breedte"
+        value={width}
+        onChange={store(setWidth)}
+        min={0.1}
+        autoFocus
+      />
+      <MeasurementInput label="Hoogte" value={height} onChange={store(setHeight)} min={0.1} />
       <MeasurementInput
         label="Afstand vanaf linkerhoek"
         value={offset}
-        onChange={setOffset}
+        onChange={store(setOffset)}
         min={0}
         placeholder="0.00"
         hint="Gemeten vanaf de linkerhoek als je tegen deze muur aan kijkt."

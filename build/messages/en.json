@@ -39,6 +39,7 @@
     "errors": {
       "authFailed": "Login failed. The link has expired or was already used.",
       "missingRole": "Your account has no role yet. Please contact support.",
+      "roleMismatch": "Your role changed since you last signed in. Please sign in again to continue.",
       "invalidCredentials": "That email address or password is incorrect.",
       "roleRequired": "Choose a role first."
     }
