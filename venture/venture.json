@@ -158,8 +158,8 @@
     "project_ref": "uiqsagwikywgeiyunypg",
     "region": "North EU (Stockholm)",
     "url": "https://uiqsagwikywgeiyunypg.supabase.co",
-    "migration": "20260729000001_init.sql",
-    "tables_verified": 12,
+    "migration": "20260730000002_pro_initiated_workflow.sql",
+    "tables_verified": 14,
     "rls_policies": 24,
     "status": "live",
     "connected": "2026-07-29"
@@ -193,6 +193,6 @@
     "moodboards",
     "moodboard_images"
   ],
-  "migration_003_status": "pending \u2014 paste supabase/migrations/20260730000002_pro_initiated_workflow.sql into Supabase SQL editor",
+  "migration_003_status": "applied \u2014 2026-07-30",
   "screens_total": 23
 }
