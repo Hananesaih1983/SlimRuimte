@@ -19,6 +19,9 @@ export default async function DesignerDashboardPage() {
           title={t("no_assignments")}
           body={t("no_assignments_body")}
         />
+        <p className="text-xs text-muted-foreground border rounded-lg p-3 bg-muted/30">
+          💡 <strong>Pro-tip:</strong> Als interieurontwerper kun je ook zelf een project aanmaken voor een klant — deze functie komt in Week 9 beschikbaar. Tot die tijd ontvang je opdrachten via het platform zodra huiseigenaren een visualisatie aanvragen.
+        </p>
       </section>
     </div>
   );
