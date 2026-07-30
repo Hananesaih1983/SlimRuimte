@@ -7,6 +7,10 @@ export default async function DesignerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole("interior_designer");
-  return <RoleShell role="interior_designer">{children}</RoleShell>;
+  const { user } = await requireRole("interior_designer");
+  return (
+    <RoleShell role="interior_designer" email={user.email}>
+      {children}
+    </RoleShell>
+  );
 }

@@ -7,6 +7,10 @@ export default async function AgentLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole("estate_agent");
-  return <RoleShell role="estate_agent">{children}</RoleShell>;
+  const { user } = await requireRole("estate_agent");
+  return (
+    <RoleShell role="estate_agent" email={user.email}>
+      {children}
+    </RoleShell>
+  );
 }

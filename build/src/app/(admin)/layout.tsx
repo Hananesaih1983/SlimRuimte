@@ -7,6 +7,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole("admin");
-  return <RoleShell role="admin">{children}</RoleShell>;
+  const { user } = await requireRole("admin");
+  return (
+    <RoleShell role="admin" email={user.email}>
+      {children}
+    </RoleShell>
+  );
 }

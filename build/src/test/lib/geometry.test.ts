@@ -196,7 +196,7 @@ describe("parseWall", () => {
     });
   });
 
-  it.each([
+  const badLengths: Array<[unknown, string]> = [
     [null, "null"],
     [undefined, "undefined"],
     [true, "boolean"],
@@ -208,10 +208,12 @@ describe("parseWall", () => {
     [{}, "object"],
     [Number.NaN, "NaN"],
     [Infinity, "Infinity"],
-  ])("rejects a length of %j (%s)", (length) => {
+  ];
+
+  it.each(badLengths)("rejects a length of %j (%s)", (length, label) => {
     // Bare Number() would turn null, "" and [] into 0 and true into 1, letting a
     // hand-rolled POST smuggle a fabricated wall past the parser.
-    expect(parseWall({ id: "N", length, height: 2.6 })).toBeNull();
+    expect(parseWall({ id: "N", length, height: 2.6 }), label).toBeNull();
   });
 
   it("rejects an unknown wall id", () => {

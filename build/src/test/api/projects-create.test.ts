@@ -138,19 +138,21 @@ describe("POST /api/projects/create", () => {
   });
 
   describe("postcode validation", () => {
-    it.each([
+    const badPostcodes: Array<[unknown, string]> = [
       ["<script>x", "html injection"],
       ["'; DROP--", "sql injection"],
       ["ABCDEF", "letters only"],
       ["12345", "five digits"],
       ["1234 ABC", "three letters"],
       [{ toString: () => "1234 AB" }, "non-string"],
-    ])("rejects %j (%s) with 400", async (postcode) => {
+    ];
+
+    it.each(badPostcodes)("rejects %j (%s) with 400", async (postcode, label) => {
       signIn({ id: HOMEOWNER });
 
       const response = await POST(post({ postcode }));
 
-      expect(response.status).toBe(400);
+      expect(response.status, label).toBe(400);
       expect(db.rows("projects")).toHaveLength(0);
     });
 

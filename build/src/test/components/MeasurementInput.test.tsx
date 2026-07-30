@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MeasurementInput } from "@/components/scan/MeasurementInput";
+import { roundCm } from "@/lib/scan/geometry";
 
 /**
  * The interesting behaviour here is the focused/blurred formatting split: the
@@ -231,6 +233,44 @@ describe("MeasurementInput", () => {
       fireEvent.blur(input);
 
       expect(input.value).toBe("");
+    });
+
+    /**
+     * The field must show the number the app actually stored, not the raw text
+     * the user typed.
+     *
+     * The wizard's onChange is `updateWall({ length: roundCm(value) })`, and
+     * `roundCm` (Math.round(v * 100) / 100) and `Number#toFixed(2)` do not agree
+     * on every input: 4.205 is 4.20499999999999996 in IEEE-754, so roundCm gives
+     * 4.20 while toFixed gives "4.21". Formatting the blur from the local text
+     * instead of from the prop therefore lets the field display 4.21 cm while
+     * the saved wall — and the floor plan, the PDF and the contractor brief
+     * built from it — say 4.20.
+     *
+     * One centimetre, but it is the one number this whole product sells.
+     */
+    it("shows the value the parent stored, not the raw text, when the two round differently", () => {
+      function Harness() {
+        const [value, setValue] = useState<number | null>(null);
+        return (
+          <MeasurementInput
+            label="Muur Noord"
+            value={value}
+            onChange={(next) => setValue(next === null ? null : roundCm(next))}
+          />
+        );
+      }
+
+      render(<Harness />);
+      const input = screen.getByLabelText("Muur Noord") as HTMLInputElement;
+
+      fireEvent.focus(input);
+      type(input, "4.205");
+      fireEvent.blur(input);
+
+      expect(roundCm(4.205)).toBe(4.2);
+      expect((4.205).toFixed(2)).toBe("4.21");
+      expect(input.value).toBe("4.20");
     });
 
     it("resyncs when the parent changes the value while unfocused", () => {

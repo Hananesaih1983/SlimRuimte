@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
 import { RoleDashboard } from "@/components/role-dashboard";
 import { buttonVariants } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth";
@@ -47,35 +48,30 @@ export default async function HomeownerDashboardPage() {
           ) : null}
         </div>
 
-        {rows.length === 0 ? <EmptyState /> : <ProjectList projects={rows} />}
+        {rows.length === 0 ? (
+          <EmptyState
+            icon="📐"
+            title="Nog geen projecten"
+            body="Scan je ruimte in en krijg binnen enkele minuten een plattegrond en visualisaties van je verbouwing."
+          >
+            <Link
+              href="/homeowner/project/new"
+              className={buttonVariants({ size: "lg" })}
+            >
+              Nieuw project starten
+            </Link>
+          </EmptyState>
+        ) : (
+          <ProjectList projects={rows} />
+        )}
       </section>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border px-6 py-12 text-center">
-      <span aria-hidden className="text-4xl">
-        📐
-      </span>
-      <div className="flex flex-col gap-1">
-        <p className="text-base font-medium">Nog geen projecten</p>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Scan je ruimte in en krijg binnen enkele minuten een plattegrond en
-          visualisaties van je verbouwing.
-        </p>
-      </div>
-      <Link href="/homeowner/project/new" className={buttonVariants({ size: "lg" })}>
-        Nieuw project starten
-      </Link>
     </div>
   );
 }
 
 function ProjectList({ projects }: { projects: ProjectRow[] }) {
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="grid gap-3 sm:grid-cols-2">
       {projects.map((project) => {
         const roomType = ROOM_TYPES.find(
           (candidate) => candidate.id === project.renovation_type,
@@ -85,26 +81,31 @@ function ProjectList({ projects }: { projects: ProjectRow[] }) {
           <li key={project.id}>
             <Link
               href={`/homeowner/project/${project.id}`}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 transition-colors hover:bg-muted"
+              className="flex h-full flex-col gap-3 rounded-xl border border-border px-4 py-4 transition-colors hover:bg-muted"
             >
-              <span className="flex items-center gap-3">
-                <span aria-hidden className="text-xl">
-                  {roomType?.icon ?? "🏠"}
-                </span>
-                <span className="flex flex-col">
+              <div className="flex items-start justify-between gap-3">
+                <span className="flex items-center gap-2">
+                  <span aria-hidden className="text-xl">
+                    {roomType?.icon ?? "🏠"}
+                  </span>
                   <span className="text-sm font-medium">
-                    {project.title ?? roomType?.label ?? "Naamloos project"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(project.created_at)}
-                    {project.scan_method
-                      ? ` · ${project.scan_method === "lidar" ? "LiDAR" : "Handmatig"}`
-                      : ""}
+                    {project.title ?? roomType?.label ?? "Verbouwing"}
                   </span>
                 </span>
-              </span>
-              <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                {PROJECT_STATUS_LABELS[project.status] ?? project.status}
+                <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                  {PROJECT_STATUS_LABELS[project.status] ?? project.status}
+                </span>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                {formatDate(project.created_at)}
+                {project.scan_method
+                  ? ` · ${project.scan_method === "lidar" ? "LiDAR" : "Handmatig gemeten"}`
+                  : ""}
+              </p>
+
+              <span className="mt-auto text-sm font-medium text-primary">
+                Bekijk project →
               </span>
             </Link>
           </li>

@@ -7,6 +7,10 @@ export default async function ContractorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole("contractor");
-  return <RoleShell role="contractor">{children}</RoleShell>;
+  const { user } = await requireRole("contractor");
+  return (
+    <RoleShell role="contractor" email={user.email}>
+      {children}
+    </RoleShell>
+  );
 }

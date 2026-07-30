@@ -233,21 +233,23 @@ describe("POST /api/scan/manual-save", () => {
     expect(ownerProject().room_dimensions).toBeUndefined();
   });
 
-  it.each([
+  const badLengths: Array<[unknown, string]> = [
     ["DROP TABLE projects", "sql injection string"],
     [null, "null"],
     [true, "boolean"],
     [[], "empty array"],
     ["", "empty string"],
     ["NaN", "NaN literal"],
-  ])("rejects a wall length of %j (%s)", async (length) => {
+  ];
+
+  it.each(badLengths)("rejects a wall length of %j (%s)", async (length, label) => {
     signIn({ id: OWNER });
 
     const response = await POST(
       post({ projectId: OWNER_PROJECT, walls: validWalls({ N: { length } }) }),
     );
 
-    expect(response.status).toBe(400);
+    expect(response.status, label).toBe(400);
     expect(ownerProject().room_dimensions).toBeUndefined();
   });
 

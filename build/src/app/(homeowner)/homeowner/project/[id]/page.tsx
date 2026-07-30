@@ -169,6 +169,26 @@ function NextSteps({ status, hasScan }: { status: string; hasScan: boolean }) {
         <Step done={false} label="Stijl kiezen en visualisaties maken" upcoming />
         <Step done={false} label="Briefing naar ontwerper of aannemer" upcoming />
       </ul>
+
+      {planReady ? (
+        <div className="flex flex-col items-start gap-1.5 pt-2">
+          {/* The floor plan viewer ships in Week 3 (F03). Showing the button
+              disabled tells the homeowner what is coming without 404-ing. */}
+          <button
+            type="button"
+            disabled
+            className={buttonVariants({
+              size: "lg",
+              className: "h-11 px-6 text-base",
+            })}
+          >
+            Volgende stap: Plattegrond bekijken →
+          </button>
+          <p className="text-sm text-muted-foreground">
+            Binnenkort beschikbaar — je plattegrond wordt nu voorbereid.
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -209,7 +229,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 function describeScanMethod(method: string | null): string {
   // Deliberately source-agnostic: `scan_source` is shown next to this and names
   // the app, and the LiDAR path has changed provider once already.
-  if (method === "lidar") return "LiDAR-scan";
+  if (method === "lidar") return "LiDAR";
   if (method === "manual") return "Handmatig gemeten";
   return "Nog niet gescand";
 }

@@ -7,6 +7,10 @@ export default async function HomeownerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole("homeowner");
-  return <RoleShell role="homeowner">{children}</RoleShell>;
+  const { user } = await requireRole("homeowner");
+  return (
+    <RoleShell role="homeowner" email={user.email}>
+      {children}
+    </RoleShell>
+  );
 }

@@ -14,7 +14,9 @@ export function LogoutButton() {
   function handleLogout() {
     startTransition(async () => {
       await createClient().auth.signOut();
-      router.replace("/auth/login");
+      // Home, not /auth/login: signing out is not the start of signing back in,
+      // and the homepage is the only page that works with no session.
+      router.replace("/");
       router.refresh();
     });
   }

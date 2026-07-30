@@ -1,7 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import type { Role } from "@/lib/roles";
 
-/** Placeholder dashboard body — Week 1 proves auth + role routing only. */
+/**
+ * Welcome header shared by every role dashboard.
+ *
+ * Role and email also appear in the NavBar, but repeating the email here is
+ * deliberate: on a phone the NavBar hides it, and during user testing the
+ * founder needs to see at a glance which account a screenshot came from.
+ */
 export async function RoleDashboard({
   role,
   email,
@@ -16,18 +22,14 @@ export async function RoleDashboard({
   ]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{tCommon("welcome")}</h1>
-      <dl className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-border px-4 py-3">
-          <dt className="text-xs text-muted-foreground">{tDashboard("yourRole")}</dt>
-          <dd className="text-sm font-medium">{tRoles(`${role}.name`)}</dd>
-        </div>
-        <div className="rounded-lg border border-border px-4 py-3">
-          <dt className="text-xs text-muted-foreground">{tDashboard("signedInAs")}</dt>
-          <dd className="text-sm font-medium">{email}</dd>
-        </div>
-      </dl>
+    <div className="flex flex-col gap-1">
+      <h1 className="text-2xl font-semibold tracking-tight">
+        {tCommon("welcome")}
+        {email ? `, ${email}` : ""}
+      </h1>
+      <p className="text-sm text-muted-foreground">
+        {tDashboard("yourRole")}: {tRoles(`${role}.name`)}
+      </p>
     </div>
   );
 }
