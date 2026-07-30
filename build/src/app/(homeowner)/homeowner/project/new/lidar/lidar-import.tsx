@@ -15,7 +15,7 @@ import type { RoomDimensions } from "@/lib/scan/types";
  */
 
 const SCAN_STEPS = [
-  "Download de gratis 3D Scanner App uit de App Store (door Laan Labs). Geen account nodig.",
+  null, // Step 1 is rendered separately with a download button
   "Open de app en tik op de + knop om een nieuwe scan te starten.",
   "Loop rustig langs alle muren tot de ruimte volledig gesloten is (±2 minuten).",
   "Tik op Gereed → Exporteer → Room.json en sla het bestand op.",
@@ -114,10 +114,27 @@ export function LidarImport({ projectId }: { projectId: string }) {
           <AppStoreBadge />
 
           <ol className="flex flex-col gap-3">
-            {SCAN_STEPS.map((text, index) => (
+            <li className="flex gap-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                1
+              </span>
+              <span className="text-sm">
+                Download de gratis{" "}
+                <a
+                  href="https://apps.apple.com/app/3d-scanner-app/id1419913995"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium underline underline-offset-2"
+                >
+                  3D Scanner App
+                </a>{" "}
+                uit de App Store (door Laan Labs). Geen account nodig.
+              </span>
+            </li>
+            {SCAN_STEPS.filter(Boolean).map((text, index) => (
               <li key={text} className="flex gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {index + 1}
+                  {index + 2}
                 </span>
                 <span className="text-sm">{text}</span>
               </li>
@@ -257,7 +274,12 @@ function Fact({ label, value }: { label: string; value: string }) {
 /** Placeholder badge — no App Store artwork is licensed into the repo yet. */
 function AppStoreBadge() {
   return (
-    <div className="flex w-fit items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+    <a
+      href="https://apps.apple.com/app/3d-scanner-app/id1419913995"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex w-fit items-center gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3 transition-colors hover:bg-muted/70"
+    >
       <span
         aria-hidden
         className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-xl"
@@ -265,11 +287,11 @@ function AppStoreBadge() {
         📱
       </span>
       <div className="flex flex-col">
-        <span className="text-sm font-semibold">3D Scanner App</span>
+        <span className="text-sm font-semibold">3D Scanner App downloaden →</span>
         <span className="text-xs text-muted-foreground">
-          Laan Labs · gratis · Apple RoomPlan
+          Laan Labs · gratis · Apple App Store · iPhone 12 Pro+ / iPad Pro
         </span>
       </div>
-    </div>
+    </a>
   );
 }
