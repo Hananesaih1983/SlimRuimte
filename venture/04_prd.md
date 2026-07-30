@@ -24,11 +24,37 @@ Number of contractor briefs delivered per week (each brief = 3 contractor contac
 
 ## Users
 
-| Role | Description | Primary pain |
-|------|-------------|-------------|
-| Homeowner (B2C) | NL/BE resident planning a renovation (kitchen, bathroom, open-plan, extension) | Cannot visualise the result; cannot find a trustworthy contractor |
-| Contractor (B2B supply) | BouwGarant-certified NL/BE renovation contractor | Pays for cold leads that ghost; wants pre-scoped, pre-visualised clients |
-| Estate agent (B2B channel) | NL/BE makelaar listing properties on Funda | Wants 3D tours to boost Funda ranking without expensive Matterport shoot |
+| Role | Description | Primary pain | Pays platform |
+|------|-------------|-------------|--------------|
+| Homeowner (B2C) | NL/BE resident planning a renovation (kitchen, bathroom, open-plan, extension) | Cannot visualise the result; cannot find a trustworthy contractor | Optional (render upgrade €2.50) |
+| Contractor (B2B supply) | BouwGarant-certified NL/BE renovation contractor | Pays for cold leads that ghost; wants pre-scoped, pre-visualised clients | €35/lead accepted + professional subscription (€99–299/mo) |
+| Interior designer (B2B supply) | BNI/AiNB affiliated verified interior designer | Needs pre-visualised client briefs; wants qualified leads, not cold outreach | €25/lead accepted + professional subscription (€99–299/mo) |
+| Estate agent (B2B channel) | NL/BE makelaar listing properties on Funda | Wants 3D tours to boost Funda ranking without expensive Matterport shoot | €29/property scan |
+
+---
+
+## Workflow Types
+
+Three distinct flows — all built on the same scan/render/brief pipeline.
+
+### Type 1 — Homeowner-Initiated (existing)
+1. Homeowner scans room (LiDAR or manual)
+2. Completes style brief → 3 renders + floor plan generated
+3. Approves brief → contractor/designer marketplace activated → 3 leads delivered
+
+### Type 2 — Professional-Initiated (new)
+1. Professional (contractor or interior designer) creates a project for a named client
+2. Professional scans the client's room
+3. System generates full renders, floor plan, 3D model — professional sees everything immediately
+4. Professional controls visibility: toggles which assets the client can see (renders, floor plan, side views, 3D model, full brief) — each toggle OFF by default
+5. Professional invites client via email (claim link sent via Resend)
+6. Client claims the project (creates account or logs in) → sees only released assets
+7. Client approves brief → contractor marketplace activated (other contractors can bid; original contractor is pre-matched)
+
+### Type 3 — Collaborative (future, v2)
+1. Professional joins an existing homeowner-initiated project (invited by homeowner)
+2. Professional adds design assets (additional renders, revised floor plan, spec sheet)
+3. Client approves updated brief → revised contractor matching runs
 
 ---
 
@@ -261,6 +287,116 @@ In-platform messaging between homeowner and matched contractors:
 - Each placed item links to the retailer product page (affiliate commission: 5-10% of sale)
 - This transforms renders from aspirational to shoppable: "you can buy exactly what you see"
 - Retailer pitch: EPR 2030 furniture waste reduction — platform reduces mis-purchases and returns
+
+### 14. Professional Subscription Plans
+
+Three tiers for contractors and interior designers who want to create projects on behalf of clients (Type 2 Workflow):
+
+| Plan | Price | Projects/month |
+|------|-------|---------------|
+| Starter | €99/mo | 5 projects |
+| Professional | €199/mo | 15 projects |
+| Expert | €299/mo | Unlimited |
+
+- Billed monthly via Stripe Subscriptions; cancellable at any time
+- Plan enforced server-side: `projects_this_period` tracked against `projects_limit` in `professional_subscriptions` table
+- Subscription required to create Type 2 (professional-initiated) projects
+- Lead fees (€35/lead for contractors, €25/lead for designers) still apply on top of subscription — subscription gives the ability to create client projects, marketplace leads remain separate revenue
+
+### 15. Professional Project Creation Flow
+
+- Accessible at `/contractor/project/new` and `/designer/project/new`
+- Step 1: Client details — name, email (optional if existing SlimRuimte user), phone, postcode
+- Step 2: Room scan — same LiDAR/manual device detection as homeowner flow
+- Step 3: Full render + floor plan generation — professional sees all assets immediately
+- Visibility controls panel: professional releases assets to client individually (renders, floor plan, side views, 3D model, full brief) — all OFF by default
+- Step 4: Client invite — sends claim email with unique token (Resend transactional email)
+
+### 16. Client Invite Email + Claim Flow
+
+- Invite email sent via Resend with a unique time-limited token (7-day expiry)
+- `/invite/[token]` landing page — no login required to preview released assets
+- Preview shows only assets the professional has toggled ON; renders are blurred if not released
+- CTA: "Bekijk mijn plan en maak een account" → account creation → project claimed
+- `project_invites` table tracks: token, client_email, claimed_by, expires_at
+- GDPR: token and email deleted after claim or 30 days, whichever is first
+
+### 17. Asset Visibility Controls
+
+- `professional_visibility_settings` JSONB column on `projects` table
+- Fields: `{ renders: bool, floor_plan: bool, side_views: bool, model_3d: bool, full_brief: bool }` — all `false` by default
+- `user_can_see_project_asset(project_id, asset_type, user_id)` SECURITY DEFINER function controls all asset access
+- Professional UI: "Wat ziet de klant?" panel with one toggle per asset type
+- Homeowner UI: sees only released assets; blurred placeholders for unreleased assets with copy "Nog niet vrijgegeven door je ontwerper"
+
+---
+
+### 18. Full Project Management (ev_011, ev_012 — visualisation and scope lock-in)
+
+**18a. AI-generated project plan**
+- When a professional creates a project and the renovation brief is complete, an AI Edge Function generates a draft `project_plans` row with pre-populated `project_tasks`
+- Draft is marked `ai_generated = TRUE` and `status = 'draft'` — professional must review and activate
+- Plan notice shown to professional: "Dit plan is automatisch gegenereerd op basis van je verbouwingsbrief. Controleer en pas aan."
+- AI generation uses the same renovation type, room dimensions, and style brief as the render pipeline; output is a structured set of tasks with estimated dates and budgets
+
+**18b. Tasks + Gantt timeline (Screen 20 — Tasks + Timeline tabs)**
+- Task list with parent/subtask hierarchy (`parent_task_id` self-reference on `project_tasks`)
+- Each task: title, description, assignee, role, start/end dates, duration, dependencies (`depends_on UUID[]`), budget, actual cost, progress %, milestone flag, visible-to-homeowner flag
+- Status values: todo / in_progress / blocked / done / cancelled
+- Visual Gantt chart with date axis, colour-coded bars, dependency arrows, today marker, three zoom levels (week / month / full project)
+- Drag to reorder; inline add/edit; filter by status, assignee, trade
+
+**18c. Budget tracking (Screen 20 — Budget tab)**
+- `budget_items` table linked to plan and optionally to a specific task
+- Categories: labour / materials / permits / design_fees / contingency / other
+- Donut chart: total vs. spent; line-items table with estimated, actual, paid status, invoice link
+- Export budget to PDF (WeasyPrint)
+
+**18d. Document management (Screen 20 — Documents tab)**
+- Upload to Supabase Storage; stored in `project_documents` with document type and visibility toggle
+- Types: quote / invoice / permit / contract / photo / report / other
+- Professional controls `visible_to_homeowner` per document
+
+**18e. Subcontractor management (Screen 20 — Subcontractors tab)**
+- Professional adds subcontractors (name, company, email, trade) to a project
+- Invite sent via Resend with unique `invite_token`; subcontractor can join SlimRuimte and be assigned tasks
+- `subcontractors` table: `registered_user_id` set if they create an account; otherwise treated as external contact
+
+**18f. Homeowner client view (Screen 21)**
+- Read-only progress view at `/homeowner/project/[id]/voortgang`
+- Shows: milestone-only timeline, budget percentage (no line items by default), key dates, shared documents, progress photo gallery, messages link
+- Professional controls all visibility; homeowner cannot edit anything in this view
+
+**Evidence link:** ev_011 — homeowners invest 9.6 months in planning and have visualisation anxiety; a live project plan visible to the client reduces mid-project disputes (same trust mechanism as pre-scoped briefs reducing contractor change orders — ev_012).
+
+---
+
+### 19. AI Moodboard Builder (ev_011, ev_012 — visualisation closes the deal and locks scope)
+
+**19a. Three-path entry + merge architecture (Screen 22)**
+- Path A — Upload: homeowner uploads inspiration photos (max 20, 10MB each, JPG/PNG/WEBP); AI vision API extracts hex colors + style keywords per image; tags shown as editable pills
+- Path B — AI Chat: guided conversation via streaming AI chat (Supabase Realtime + Edge Function); AI asks about style, colors, materials, light, must-haves; AI suggests reference images inline, user pins them to moodboard with one tap
+- Path C — Guided questions: enhanced version of the original 5-question style brief — visual option cards with real room photos for style question, material swatch chips for materials question; after completion AI generates a text description + 3 matching image suggestions
+- All three paths merge into one `moodboards` row per project before render generation; user can combine all three paths freely
+
+**19b. Merged moodboard view + render unlock (Screen 22 — merged view)**
+- Pinterest-style grid of all images from all paths
+- AI assembles `style_summary`, `dominant_colors` (5 swatches), `style_keywords`, `materials`, `lighting` from across all path inputs
+- 'Renders genereren →' CTA enabled when: ≥3 images present OR Path C questionnaire complete
+- Both homeowner and professional can build and edit the moodboard
+
+**19c. Moodboard review screen (Screen 23)**
+- Final pre-render check: shows moodboard grid, color palette, style summary, key materials
+- Displays the assembled Flux render prompt (with option to edit manually — advanced)
+- Displays "Renders klaar in ~45 seconden" estimated time
+- Confirms before starting render generation → navigates to Screen 6
+
+**19d. Updated render prompt assembly**
+- Replaces the previous 5-question `style_answers` → `render_prompt` pipeline
+- New assembly (in priority order): renovation_type → room geometry → `style_summary` → `dominant_colors` → `style_keywords + materials` → `lighting`
+- Backward compatible: if `moodboards` row is absent, falls back to `projects.render_prompt` from original 5-question flow
+
+**Evidence link:** ev_011 — visualisation closes the deal; ev_012 — scope is locked when client approves a moodboard-driven render. The moodboard builder replaces a plain text questionnaire with a richer visual brief that better captures intent, reduces post-render dissatisfaction, and creates a better quality signal for contractors.
 
 ---
 

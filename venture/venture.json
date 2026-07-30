@@ -173,5 +173,26 @@
     "deployed": "2026-07-30",
     "routes_live": 22,
     "github_autodeploy": "pending \u2014 install github.com/apps/vercel manually"
-  }
+  },
+  "features_added": [
+    "professional_initiated_workflow",
+    "professional_subscriptions",
+    "project_invites_with_asset_visibility",
+    "full_project_management_gantt_budget_docs",
+    "subcontractor_management",
+    "ai_moodboard_builder_3_paths"
+  ],
+  "new_tables_pending_migration_003": [
+    "professional_subscriptions",
+    "project_invites",
+    "project_plans",
+    "project_tasks",
+    "project_documents",
+    "subcontractors",
+    "budget_items",
+    "moodboards",
+    "moodboard_images"
+  ],
+  "migration_003_status": "pending \u2014 paste supabase/migrations/20260730000002_pro_initiated_workflow.sql into Supabase SQL editor",
+  "screens_total": 23
 }

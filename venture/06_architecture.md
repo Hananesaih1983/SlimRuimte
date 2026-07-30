@@ -266,6 +266,143 @@ CREATE INDEX idx_leads_recipient ON public.leads(recipient_id, status, sent_at D
 CREATE INDEX idx_leads_project ON public.leads(project_id, status);
 ```
 
+### professional_subscriptions (Type 2 workflow — professional monthly plans)
+```sql
+CREATE TABLE public.professional_subscriptions (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id               UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  plan                  TEXT NOT NULL CHECK (plan IN ('starter','professional','expert')),
+  price_eur             NUMERIC(8,2) NOT NULL,          -- 99 / 199 / 299
+  projects_limit        INT,                            -- 5 / 15 / NULL (unlimited)
+  projects_this_period  INT NOT NULL DEFAULT 0,         -- resets on billing cycle
+  period_start          TIMESTAMPTZ NOT NULL,
+  period_end            TIMESTAMPTZ NOT NULL,
+  stripe_subscription_id TEXT UNIQUE,
+  stripe_customer_id    TEXT,
+  status                TEXT NOT NULL DEFAULT 'active'
+                        CHECK (status IN ('active','past_due','cancelled','trialing')),
+  cancelled_at          TIMESTAMPTZ,
+  created_at            TIMESTAMPTZ DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: professional sees own subscription; admin all
+CREATE POLICY sub_owner ON public.professional_subscriptions
+  FOR ALL USING (user_id = auth.uid() OR
+                 EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+-- Index: quick lookup when enforcing project creation limit
+CREATE INDEX idx_prof_sub_user ON public.professional_subscriptions(user_id, status);
+```
+
+### project_invites (client claim tokens for Type 2 workflow)
+```sql
+CREATE TABLE public.project_invites (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id    UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  created_by    UUID NOT NULL REFERENCES public.users(id),  -- the professional
+  client_email  TEXT NOT NULL,
+  token         TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
+  claimed_by    UUID REFERENCES public.users(id),           -- set on claim
+  claimed_at    TIMESTAMPTZ,
+  expires_at    TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '7 days',
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: only admin and the creating professional can read invite rows;
+--       public token lookup handled via claim_project_invite() SECURITY DEFINER function
+CREATE POLICY invite_owner ON public.project_invites
+  FOR ALL USING (created_by = auth.uid() OR
+                 EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+CREATE INDEX idx_invites_token ON public.project_invites(token);
+CREATE INDEX idx_invites_project ON public.project_invites(project_id);
+```
+
+### professional_visibility_settings column on projects
+```sql
+-- Added to the projects table as a JSONB column (migration):
+ALTER TABLE public.projects
+  ADD COLUMN professional_visibility_settings JSONB NOT NULL DEFAULT
+    '{"renders": false, "floor_plan": false, "side_views": false,
+      "model_3d": false, "full_brief": false}';
+-- professional_id column: tracks which professional created this project (NULL for homeowner-initiated)
+ALTER TABLE public.projects
+  ADD COLUMN professional_id UUID REFERENCES public.users(id);   -- NULL for Type 1
+ALTER TABLE public.projects
+  ADD COLUMN workflow_type TEXT DEFAULT 'homeowner_initiated'
+    CHECK (workflow_type IN ('homeowner_initiated','professional_initiated','collaborative'));
+```
+
+### Security-definer helper functions
+
+**`user_can_see_project_asset(p_project_id UUID, p_asset TEXT, p_user_id UUID) → BOOLEAN`**
+```sql
+CREATE OR REPLACE FUNCTION public.user_can_see_project_asset(
+  p_project_id UUID,
+  p_asset      TEXT,        -- 'renders' | 'floor_plan' | 'side_views' | 'model_3d' | 'full_brief'
+  p_user_id    UUID
+) RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_project projects%ROWTYPE;
+BEGIN
+  SELECT * INTO v_project FROM public.projects WHERE id = p_project_id;
+  IF NOT FOUND THEN RETURN FALSE; END IF;
+
+  -- Admin always sees all
+  IF EXISTS (SELECT 1 FROM public.users WHERE id = p_user_id AND role = 'admin') THEN
+    RETURN TRUE;
+  END IF;
+
+  -- Professional who owns the project sees all
+  IF v_project.professional_id = p_user_id THEN RETURN TRUE; END IF;
+
+  -- Homeowner who owns/claimed the project: check visibility toggle
+  IF v_project.homeowner_id = p_user_id THEN
+    RETURN (v_project.professional_visibility_settings->>p_asset)::BOOLEAN;
+  END IF;
+
+  RETURN FALSE;
+END;
+$$;
+```
+
+**`claim_project_invite(p_token TEXT, p_user_id UUID) → JSONB`**
+```sql
+CREATE OR REPLACE FUNCTION public.claim_project_invite(
+  p_token   TEXT,
+  p_user_id UUID
+) RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_invite project_invites%ROWTYPE;
+BEGIN
+  SELECT * INTO v_invite FROM public.project_invites WHERE token = p_token;
+
+  IF NOT FOUND THEN
+    RETURN '{"ok": false, "error": "invite_not_found"}';
+  END IF;
+
+  IF v_invite.expires_at < NOW() THEN
+    RETURN '{"ok": false, "error": "invite_expired"}';
+  END IF;
+
+  IF v_invite.claimed_by IS NOT NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'already_claimed',
+                              'project_id', v_invite.project_id);
+  END IF;
+
+  -- Claim: assign homeowner_id on project + mark invite as claimed
+  UPDATE public.projects
+    SET homeowner_id = p_user_id, updated_at = NOW()
+  WHERE id = v_invite.project_id;
+
+  UPDATE public.project_invites
+    SET claimed_by = p_user_id, claimed_at = NOW()
+  WHERE id = v_invite.id;
+
+  RETURN jsonb_build_object('ok', true, 'project_id', v_invite.project_id);
+END;
+$$;
+```
+
 ### messages
 ```sql
 CREATE TABLE public.messages (
@@ -552,8 +689,19 @@ export const config = {
 | WeasyPrint PDF (self-hosted, CPU only) | ~$0.01 | Infra |
 | Stripe fee on €35 lead × 3 (1.5% + €0.25) | €1.83 | Stripe |
 | **Total variable cost/project** | **~$20-21 (~€18-19)** | |
-| **Gross revenue/project** | **€105** | |
+| **Gross revenue/project (lead fees)** | **€105** | |
 | **Gross margin/project** | **~82%** | |
+
+### Revenue streams
+
+| Stream | Unit economics | Notes |
+|--------|---------------|-------|
+| Contractor lead fees | €35/lead × 3/project = €105 gross | Pay-on-acceptance; primary revenue at launch |
+| Designer lead fees | €25/lead × 3/project = €75 gross | Same model; lower ticket, design-focused briefs |
+| Professional subscriptions | €99–€299/month per professional | Recurring SaaS revenue on top of lead fees; unlocks Type 2 workflow |
+| Premium render upsell | €2.50/render (Magnific upscale) | ~10% uptake; high margin (€2.30 net per render) |
+| Estate agent scans | €29/property | B2B channel; Funda ranking incentive |
+| Decodata affiliate | 5–10% of furniture sale | Passive; triggered by 3D viewer placement |
 
 ### Fixed monthly infrastructure
 
@@ -651,3 +799,321 @@ Per product-definition skill:
 - Cost model at 10/100/1,000 users: YES
 - One person can build in time box: YES with Claude Code + 60h part-time developer
 - Novel technology risk identified: YES — trimesh 3D room generation is the only non-commodity component; fallback = use magicplan OBJ directly without custom generation
+
+---
+
+## FEATURE ADDITIONS — Full Project Management + AI Moodboard Builder
+
+### project_plans
+```sql
+CREATE TABLE public.project_plans (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id        UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  created_by        UUID NOT NULL REFERENCES public.users(id),
+  title             TEXT,
+  ai_generated      BOOLEAN DEFAULT TRUE,
+  status            TEXT DEFAULT 'draft'
+                    CHECK (status IN ('draft','active','on_hold','completed')),
+  start_date        DATE,
+  end_date          DATE,
+  total_budget_eur  NUMERIC(12,2),
+  spent_budget_eur  NUMERIC(12,2) DEFAULT 0,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: project owner (homeowner) and the professional who created the plan can read;
+--      only the professional (created_by) or admin can write
+CREATE POLICY plan_read ON public.project_plans
+  FOR SELECT USING (
+    created_by = auth.uid() OR
+    EXISTS (SELECT 1 FROM public.projects p
+            WHERE p.id = project_id AND p.homeowner_id = auth.uid()) OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE POLICY plan_write ON public.project_plans
+  FOR ALL USING (
+    created_by = auth.uid() OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE INDEX idx_project_plans_project ON public.project_plans(project_id, status);
+```
+
+### project_tasks
+```sql
+CREATE TABLE public.project_tasks (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id               UUID NOT NULL REFERENCES public.project_plans(id) ON DELETE CASCADE,
+  parent_task_id        UUID REFERENCES public.project_tasks(id),  -- for subtasks
+  title                 TEXT NOT NULL,
+  description           TEXT,
+  assigned_to           UUID REFERENCES public.users(id),          -- professional or subcontractor
+  assigned_role         TEXT CHECK (assigned_role IN ('contractor','interior_designer','subcontractor','homeowner')),
+  status                TEXT DEFAULT 'todo'
+                        CHECK (status IN ('todo','in_progress','blocked','done','cancelled')),
+  start_date            DATE,
+  end_date              DATE,
+  duration_days         INT,
+  depends_on            UUID[],                                     -- array of task IDs this task depends on
+  budget_eur            NUMERIC(10,2),
+  actual_cost_eur       NUMERIC(10,2),
+  progress_pct          INT DEFAULT 0 CHECK (progress_pct BETWEEN 0 AND 100),
+  is_milestone          BOOLEAN DEFAULT FALSE,
+  visible_to_homeowner  BOOLEAN DEFAULT TRUE,
+  created_at            TIMESTAMPTZ DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: follows project_plans access (join through plan_id → project_id → homeowner check)
+CREATE POLICY task_read ON public.project_tasks
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.project_plans pp
+      JOIN public.projects p ON p.id = pp.project_id
+      WHERE pp.id = plan_id AND (
+        pp.created_by = auth.uid() OR
+        p.homeowner_id = auth.uid() OR
+        EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+      )
+    )
+  );
+CREATE POLICY task_write ON public.project_tasks
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.project_plans pp
+      WHERE pp.id = plan_id AND (
+        pp.created_by = auth.uid() OR
+        EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+      )
+    )
+  );
+-- Additional RLS: homeowner only sees tasks where visible_to_homeowner = TRUE
+CREATE POLICY task_homeowner_filter ON public.project_tasks
+  FOR SELECT USING (
+    visible_to_homeowner = TRUE OR
+    EXISTS (
+      SELECT 1 FROM public.project_plans pp
+      WHERE pp.id = plan_id AND pp.created_by = auth.uid()
+    ) OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE INDEX idx_project_tasks_plan ON public.project_tasks(plan_id, status);
+CREATE INDEX idx_project_tasks_parent ON public.project_tasks(parent_task_id);
+CREATE INDEX idx_project_tasks_assigned ON public.project_tasks(assigned_to);
+```
+
+### project_documents
+```sql
+CREATE TABLE public.project_documents (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id            UUID NOT NULL REFERENCES public.projects(id),
+  plan_id               UUID REFERENCES public.project_plans(id),
+  task_id               UUID REFERENCES public.project_tasks(id),
+  uploaded_by           UUID NOT NULL REFERENCES public.users(id),
+  document_type         TEXT CHECK (document_type IN ('quote','invoice','permit','contract','photo','report','other')),
+  filename              TEXT NOT NULL,
+  storage_path          TEXT NOT NULL,                             -- Supabase Storage path
+  size_bytes            BIGINT,
+  visible_to_homeowner  BOOLEAN DEFAULT TRUE,
+  created_at            TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: uploader + professional on the project can write;
+--      homeowner can read rows where visible_to_homeowner = TRUE
+CREATE POLICY doc_write ON public.project_documents
+  FOR ALL USING (
+    uploaded_by = auth.uid() OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE POLICY doc_read ON public.project_documents
+  FOR SELECT USING (
+    uploaded_by = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM public.projects p
+      WHERE p.id = project_id AND (
+        p.homeowner_id = auth.uid() AND visible_to_homeowner = TRUE
+      )
+    ) OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE INDEX idx_project_docs_project ON public.project_documents(project_id, document_type);
+CREATE INDEX idx_project_docs_task ON public.project_documents(task_id);
+```
+
+### subcontractors
+```sql
+CREATE TABLE public.subcontractors (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  added_by            UUID NOT NULL REFERENCES public.users(id),  -- the main contractor/designer
+  project_id          UUID NOT NULL REFERENCES public.projects(id),
+  name                TEXT NOT NULL,
+  company             TEXT,
+  email               TEXT,
+  phone               TEXT,
+  trade               TEXT,  -- 'electrician','plumber','tiler','painter','carpenter','other'
+  invite_token        TEXT UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
+  registered_user_id  UUID REFERENCES public.users(id),           -- set if they join SlimRuimte
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: only the professional who added the subcontractor (added_by) or admin can read/write
+CREATE POLICY subcontractor_access ON public.subcontractors
+  FOR ALL USING (
+    added_by = auth.uid() OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE INDEX idx_subcontractors_project ON public.subcontractors(project_id);
+CREATE INDEX idx_subcontractors_token ON public.subcontractors(invite_token);
+```
+
+### budget_items
+```sql
+CREATE TABLE public.budget_items (
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id               UUID NOT NULL REFERENCES public.project_plans(id),
+  task_id               UUID REFERENCES public.project_tasks(id),
+  category              TEXT CHECK (category IN ('labour','materials','permits','design_fees','contingency','other')),
+  description           TEXT NOT NULL,
+  estimated_eur         NUMERIC(10,2),
+  actual_eur            NUMERIC(10,2),
+  paid                  BOOLEAN DEFAULT FALSE,
+  paid_at               TIMESTAMPTZ,
+  invoice_document_id   UUID REFERENCES public.project_documents(id),
+  created_at            TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: follows project_plans access (plan_id → created_by check)
+CREATE POLICY budget_access ON public.budget_items
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.project_plans pp
+      WHERE pp.id = plan_id AND (
+        pp.created_by = auth.uid() OR
+        EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+      )
+    )
+  );
+CREATE INDEX idx_budget_items_plan ON public.budget_items(plan_id, category);
+```
+
+### moodboards
+```sql
+CREATE TABLE public.moodboards (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id              UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  created_by              UUID NOT NULL REFERENCES public.users(id),
+  title                   TEXT DEFAULT 'Mijn moodboard',
+  status                  TEXT DEFAULT 'building'
+                          CHECK (status IN ('building','ready','used_for_render')),
+  -- Merged style data used for render prompt generation
+  style_summary           TEXT,                   -- AI-generated summary; input to render prompt
+  dominant_colors         TEXT[],                 -- extracted hex colors from uploaded images
+  style_keywords          TEXT[],                 -- e.g. ['scandinavisch','eiken','wit','naturel']
+  materials               TEXT[],
+  lighting                TEXT,                   -- 'veel daglicht'/'sfeervol'/'helder en functioneel'
+  -- Chat conversation (Path B)
+  chat_messages           JSONB DEFAULT '[]',     -- [{role: user/assistant, content: string, ts: timestamp}]
+  -- Questionnaire answers (Path C)
+  questionnaire_answers   JSONB DEFAULT '{}',     -- {renovation_type, style, materials, light, wish}
+  -- Assembled prompt sent to Flux API
+  render_prompt           TEXT,                   -- final assembled prompt (replaces old 5-question prompt)
+  created_at              TIMESTAMPTZ DEFAULT NOW(),
+  updated_at              TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: project owner and professional who created it can read/write; admin all
+CREATE POLICY moodboard_access ON public.moodboards
+  FOR ALL USING (
+    created_by = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM public.projects p
+      WHERE p.id = project_id AND p.homeowner_id = auth.uid()
+    ) OR
+    EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+  );
+CREATE INDEX idx_moodboards_project ON public.moodboards(project_id, status);
+```
+
+### moodboard_images
+```sql
+CREATE TABLE public.moodboard_images (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  moodboard_id        UUID NOT NULL REFERENCES public.moodboards(id) ON DELETE CASCADE,
+  source              TEXT CHECK (source IN ('upload','ai_generated','chat_suggestion')),
+  storage_path        TEXT,                        -- Supabase Storage (for uploads)
+  external_url        TEXT,                        -- for AI-suggested or chat-pinned images
+  caption             TEXT,                        -- user or AI added description
+  extracted_colors    TEXT[],                      -- hex colors extracted from this image by vision API
+  extracted_keywords  TEXT[],                      -- style keywords extracted by vision API
+  sort_order          INT DEFAULT 0,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+-- RLS: follows moodboard access (moodboard_id → moodboard → project owner or creator)
+CREATE POLICY moodboard_image_access ON public.moodboard_images
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM public.moodboards mb
+      JOIN public.projects p ON p.id = mb.project_id
+      WHERE mb.id = moodboard_id AND (
+        mb.created_by = auth.uid() OR
+        p.homeowner_id = auth.uid() OR
+        EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+      )
+    )
+  );
+CREATE INDEX idx_moodboard_images_moodboard ON public.moodboard_images(moodboard_id, sort_order);
+```
+
+### Route additions (Next.js App Router)
+
+```
+app/[locale]/
+├── (homeowner)/
+│   └── project/[id]/
+│       ├── voortgang/           ← Screen 21 — homeowner project progress view
+│       ├── moodboard/
+│       │   ├── page.tsx         ← Screen 22 — moodboard builder (all 3 paths)
+│       │   └── review/
+│       │       └── page.tsx     ← Screen 23 — moodboard review before render
+├── (contractor)/
+│   └── project/[id]/
+│       ├── plan/                ← Screen 20 — professional project plan
+│       └── moodboard/
+│           └── page.tsx         ← Screen 22 (professional view)
+├── (designer)/
+│   └── project/[id]/
+│       ├── plan/                ← Screen 20 — professional project plan
+│       └── moodboard/
+│           └── page.tsx         ← Screen 22 (professional view)
+```
+
+### API route additions
+
+```
+api/
+├── project-plans/generate/      ← AI generates draft plan from renovation brief (Edge Function)
+├── project-plans/[id]/export/   ← Export budget as PDF (WeasyPrint)
+├── moodboards/analyze-image/    ← Vision API: extract colors + keywords from uploaded image
+├── moodboards/chat/             ← AI chat endpoint (Supabase Edge Function, streaming)
+├── moodboards/assemble-prompt/  ← Assemble final Flux render prompt from moodboard data
+├── subcontractors/invite/       ← Send invite email to subcontractor (Resend)
+```
+
+### Updated render prompt assembly
+
+The `render_prompt` on `public.renders` is now assembled from the moodboard (if present) rather than the simple 5-question `style_answers` JSONB. Assembly order:
+
+```
+1. renovation_type (from projects)          → scene type: "photorealistic kitchen render"
+2. room_dimensions (from projects)          → geometry: "14.28m² room, 2.60m ceiling height"
+3. moodboards.style_summary                 → style: "warm Scandinavian with oak accents"
+4. moodboards.dominant_colors               → palette: "dominant colors: #F5EDD6 #C8A97A #FFFFFF"
+5. moodboards.style_keywords + materials    → materials: "oak floor, white walls, natural linen"
+6. moodboards.lighting                      → light: "abundant natural daylight, large windows"
+```
+
+If no moodboard exists (backward compatibility), falls back to `projects.render_prompt` assembled from `style_answers` (original 5-question flow).
+
+### Personal data additions (GDPR)
+
+| Table | Field | Personal data? | Legal basis | Retention | Deletion path |
+|-------|-------|---------------|-------------|-----------|---------------|
+| subcontractors | name, email, phone | YES — direct identifier | Contract (6(1)(b)) | Project lifetime + 30 days | Delete row on project delete |
+| subcontractors | invite_token | YES — pseudonymous | Contract | Used + 30 days | Null on claim or 30 days |
+| moodboards | chat_messages | YES — personal preferences | Contract | Project lifetime | Delete on project delete (CASCADE) |
+| moodboard_images | storage_path | YES — personal photo (if uploaded) | Contract | Project lifetime | Delete file + null path on project delete |
+| project_documents | storage_path | YES — home/financial document | Contract | Project lifetime + 12 months | Delete file + null path; log in audit_events |
