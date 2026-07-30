@@ -6,7 +6,6 @@ import { RoleDashboard } from "@/components/role-dashboard";
 import { buttonVariants } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { PROJECT_STATUS_LABELS } from "@/lib/projects";
 import { ROOM_TYPES } from "@/lib/scan/types";
 import { FORMAT_LOCALE, isLocale } from "@/i18n/config";
 
@@ -87,6 +86,12 @@ function ProjectList({
   locale: string;
 }) {
   const t = useTranslations("dashboard");
+  // The room name and the status badge are the only two card fields whose copy
+  // comes from the database rather than a message key. Both were rendering the
+  // hardcoded Dutch from `ROOM_TYPES` / `PROJECT_STATUS_LABELS`, so a card still
+  // read "Keuken · Plattegrond klaar" after switching to EN or FR.
+  const tRooms = useTranslations("room_types");
+  const tStatus = useTranslations("project_status");
 
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
@@ -94,6 +99,11 @@ function ProjectList({
         const roomType = ROOM_TYPES.find(
           (candidate) => candidate.id === project.renovation_type,
         );
+        // A status outside the CHECK constraint has no message key; show the raw
+        // value rather than next-intl's "project_status.foo" error string.
+        const status = tStatus.has(project.status)
+          ? tStatus(project.status)
+          : project.status;
 
         return (
           <li key={project.id}>
@@ -107,11 +117,12 @@ function ProjectList({
                     {roomType?.icon ?? "🏠"}
                   </span>
                   <span className="text-sm font-medium">
-                    {project.title ?? roomType?.label ?? t("untitled_project")}
+                    {project.title ??
+                      (roomType ? tRooms(roomType.id) : t("untitled_project"))}
                   </span>
                 </span>
                 <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                  {PROJECT_STATUS_LABELS[project.status] ?? project.status}
+                  {status}
                 </span>
               </div>
 

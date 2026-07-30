@@ -105,5 +105,26 @@
     "no_assignments": "Geen opdrachten beschikbaar",
     "no_assignments_body": "Zodra huiseigenaren een ontwerpvraag indienen, verschijnen hun projecten hier. Je betaalt €25 per lead die je accepteert.",
     "subscription_required": "Voor deze functie heb je een actief abonnement nodig."
+  },
+  "project_status": {
+    "draft": "Concept",
+    "scanning": "Wordt gescand",
+    "renders_pending": "Plattegrond klaar",
+    "renders_done": "Visualisaties klaar",
+    "brief_approved": "Briefing goedgekeurd",
+    "brief_sent": "Briefing verstuurd",
+    "designer_matched": "Ontwerper gekoppeld",
+    "contractor_matched": "Aannemer gekoppeld",
+    "in_progress": "In uitvoering",
+    "complete": "Afgerond",
+    "archived": "Gearchiveerd"
+  },
+  "room_types": {
+    "kitchen": "Keuken",
+    "bathroom": "Badkamer",
+    "living_room": "Woonkamer",
+    "bedroom": "Slaapkamer",
+    "open_plan": "Open plattegrond",
+    "extension": "Aanbouw"
   }
 }

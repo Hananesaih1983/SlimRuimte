@@ -173,6 +173,31 @@ describe("homeowner dashboard", () => {
       expect(screen.getByText(/LiDAR/)).toBeInTheDocument();
     });
 
+    // The room name and status badge are the only card fields whose copy is
+    // chosen from a database value. Both used to come from hardcoded Dutch maps
+    // (`ROOM_TYPES.label`, `PROJECT_STATUS_LABELS`), so switching to EN or FR
+    // left a card reading "Keuken · Plattegrond klaar".
+    it("translates the room type and status badge into English", async () => {
+      seedProject({ renovation_type: "kitchen", status: "renders_pending" });
+
+      render(await HomeownerDashboard(), "en");
+
+      expect(screen.getByText("Kitchen")).toBeInTheDocument();
+      expect(screen.getByText("Floor plan ready")).toBeInTheDocument();
+      expect(screen.queryByText("Keuken")).not.toBeInTheDocument();
+      expect(screen.queryByText("Plattegrond klaar")).not.toBeInTheDocument();
+    });
+
+    it("translates the room type and status badge into French", async () => {
+      seedProject({ renovation_type: "bathroom", status: "in_progress" });
+
+      render(await HomeownerDashboard(), "fr");
+
+      expect(screen.getByText("Salle de bain")).toBeInTheDocument();
+      expect(screen.getByText("En cours")).toBeInTheDocument();
+      expect(screen.queryByText("Badkamer")).not.toBeInTheDocument();
+    });
+
     it("renders an unknown status as-is rather than blank", async () => {
       seedProject({ status: "some_future_status" });
 

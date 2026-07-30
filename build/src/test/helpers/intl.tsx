@@ -1,6 +1,19 @@
 import { render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../messages/nl.json";
+import en from "../../../messages/en.json";
+import fr from "../../../messages/fr.json";
+
+/**
+ * The real message files, by locale. `renderWithIntl(ui, "en")` used to hand the
+ * provider a locale of "en" but the Dutch messages, so a component could only
+ * ever be asserted in Dutch and a missing EN/FR key stayed invisible.
+ */
+const MESSAGES_BY_LOCALE: Record<string, typeof messages> = {
+  nl: messages,
+  en: en as typeof messages,
+  fr: fr as typeof messages,
+};
 
 /**
  * Test-side i18n plumbing.
@@ -52,7 +65,10 @@ export function serverIntlMock(locale = "nl") {
 /** Render inside the client-side message provider, as the root layout does. */
 export function renderWithIntl(ui: React.ReactElement, locale = "nl") {
   return render(
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider
+      locale={locale}
+      messages={MESSAGES_BY_LOCALE[locale] ?? messages}
+    >
       {ui}
     </NextIntlClientProvider>,
   );

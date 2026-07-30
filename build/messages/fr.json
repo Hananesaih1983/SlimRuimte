@@ -105,5 +105,26 @@
     "no_assignments": "Aucune mission disponible",
     "no_assignments_body": "Dès que des propriétaires soumettent une demande de conception, leurs projets apparaissent ici. Vous payez 25 € par lead accepté.",
     "subscription_required": "Un abonnement actif est nécessaire pour cette fonctionnalité."
+  },
+  "project_status": {
+    "draft": "Brouillon",
+    "scanning": "Numérisation en cours",
+    "renders_pending": "Plan terminé",
+    "renders_done": "Visualisations prêtes",
+    "brief_approved": "Dossier approuvé",
+    "brief_sent": "Dossier envoyé",
+    "designer_matched": "Architecte d'intérieur trouvé",
+    "contractor_matched": "Entrepreneur trouvé",
+    "in_progress": "En cours",
+    "complete": "Terminé",
+    "archived": "Archivé"
+  },
+  "room_types": {
+    "kitchen": "Cuisine",
+    "bathroom": "Salle de bain",
+    "living_room": "Salon",
+    "bedroom": "Chambre",
+    "open_plan": "Plan ouvert",
+    "extension": "Extension"
   }
 }

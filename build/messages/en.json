@@ -105,5 +105,26 @@
     "no_assignments": "No assignments available",
     "no_assignments_body": "As soon as homeowners submit a design request, their projects appear here. You pay €25 per lead you accept.",
     "subscription_required": "You need an active subscription for this feature."
+  },
+  "project_status": {
+    "draft": "Draft",
+    "scanning": "Scanning",
+    "renders_pending": "Floor plan ready",
+    "renders_done": "Visualisations ready",
+    "brief_approved": "Brief approved",
+    "brief_sent": "Brief sent",
+    "designer_matched": "Designer matched",
+    "contractor_matched": "Contractor matched",
+    "in_progress": "In progress",
+    "complete": "Completed",
+    "archived": "Archived"
+  },
+  "room_types": {
+    "kitchen": "Kitchen",
+    "bathroom": "Bathroom",
+    "living_room": "Living room",
+    "bedroom": "Bedroom",
+    "open_plan": "Open plan",
+    "extension": "Extension"
   }
 }

@@ -5,7 +5,7 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "nl";
 
-/** Cookie the language switcher writes; mirrors `public.users.language`. */
+/** Cookie the language switcher writes; read by src/i18n/request.ts. */
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
 /**

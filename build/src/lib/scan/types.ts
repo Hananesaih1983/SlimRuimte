@@ -72,6 +72,10 @@ export type RoomDimensions = {
 /**
  * Room types offered in manual step 1, mapped onto the `renovation_type` CHECK
  * constraint in `projects` (001_init.sql) so the wizard can set it on save.
+ *
+ * `label` is Dutch and is used by the not-yet-translated wizard screens. The
+ * homeowner dashboard instead resolves `id` through the `room_types` namespace
+ * in messages/*.json; a new room type needs an entry in both.
  */
 export const ROOM_TYPES = [
   { id: "kitchen", label: "Keuken", icon: "🍳" },

@@ -55,7 +55,14 @@ export function isCountry(value: unknown): value is Country {
   return typeof value === "string" && (COUNTRIES as readonly string[]).includes(value);
 }
 
-/** Human-readable Dutch labels for the statuses the homeowner can actually see. */
+/**
+ * Human-readable Dutch labels for the statuses the homeowner can actually see.
+ *
+ * Only the project detail page still reads this — the dashboard resolves the
+ * same statuses through the `project_status` namespace in messages/*.json, which
+ * is the translated source of truth. Add a status here and it must be added
+ * there too (src/test/lib/i18n.test.ts enforces the message side).
+ */
 export const PROJECT_STATUS_LABELS: Record<string, string> = {
   draft: "Concept",
   scanning: "Wordt gescand",
