@@ -110,46 +110,91 @@ export function LidarImport({ projectId }: { projectId: string }) {
       </header>
 
       {step === 1 ? (
-        <div className="flex flex-col gap-6">
-          <AppStoreBadge />
+        <div className="flex flex-col gap-8">
 
-          <ol className="flex flex-col gap-3">
-            <li className="flex gap-3">
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                1
-              </span>
-              <span className="text-sm">
-                Download de gratis{" "}
-                <a
-                  href="https://apps.apple.com/app/3d-scanner-app/id1419913995"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium underline underline-offset-2"
-                >
-                  3D Scanner App
-                </a>{" "}
-                uit de App Store (door Laan Labs). Geen account nodig.
-              </span>
-            </li>
-            {SCAN_STEPS.filter(Boolean).map((text, index) => (
-              <li key={text} className="flex gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {index + 2}
-                </span>
-                <span className="text-sm">{text}</span>
+          {/* App download */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold">Step 1 — Download the free scanning app</h2>
+            <AppStoreBadge />
+            <p className="text-sm text-muted-foreground">
+              Free to download. No account needed. Works on iPhone 12 Pro, 13 Pro, 14 Pro, 15, 15 Pro, 16 and iPad Pro (2021 or newer).
+            </p>
+          </div>
+
+          {/* Before you scan */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold">Step 2 — Prepare the room</h2>
+            <ul className="flex flex-col gap-2 text-sm">
+              <li className="flex gap-2"><span>✅</span><span><strong>Clear the floor</strong> — move chairs, boxes, or anything on the ground. The app scans better with open floor space.</span></li>
+              <li className="flex gap-2"><span>✅</span><span><strong>Open all doors</strong> — so the app can see the full doorframe.</span></li>
+              <li className="flex gap-2"><span>✅</span><span><strong>Keep furniture in place</strong> — sofas, tables, and beds are fine. The app ignores them automatically.</span></li>
+              <li className="flex gap-2"><span>✅</span><span><strong>Good lighting</strong> — turn on the lights. Bright rooms scan better.</span></li>
+              <li className="flex gap-2"><span>❌</span><span><strong>Avoid mirrors and glass</strong> — large mirrors can confuse the scanner. Stand with your back to them when possible.</span></li>
+            </ul>
+          </div>
+
+          {/* How to scan */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold">Step 3 — Scan the room</h2>
+            <ol className="flex flex-col gap-3 text-sm">
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">1</span>
+                <span>Open the <a href="https://apps.apple.com/app/3d-scanner-app/id1419913995" target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-2">3D Scanner App</a> and tap the <strong>+</strong> button to start a new scan.</span>
               </li>
-            ))}
-          </ol>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">2</span>
+                <span>Hold your phone <strong>at chest height</strong> and point it at a wall. Walk <strong>slowly</strong> along all four walls, keeping about 1–2 metres distance from each wall.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">3</span>
+                <span>Also scan the <strong>ceiling and floor corners</strong> briefly — this helps the app understand the room height.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">4</span>
+                <span>Keep walking until the <strong>walls turn blue or green</strong> — that means the room is fully captured. Takes about 2 minutes.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">5</span>
+                <span>Tap <strong>Done</strong> when all walls are covered.</span>
+              </li>
+            </ol>
+          </div>
+
+          {/* How to share */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-base font-semibold">Step 4 — Share your scan with SlimRuimte</h2>
+            <ol className="flex flex-col gap-3 text-sm">
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">1</span>
+                <span>After scanning, tap the <strong>Share</strong> icon (the square with an arrow pointing up).</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">2</span>
+                <span>Select <strong>Export</strong> → then choose <strong>Room Plan</strong> from the list of export options.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">3</span>
+                <span>Tap <strong>Save to Files</strong> and save it anywhere on your phone (Downloads or Desktop works fine).</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">4</span>
+                <span>Come back here and tap <strong>"Upload my scan"</strong> below — then find and select the file you just saved.</span>
+              </li>
+            </ol>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              💡 <strong>Tip:</strong> If you are on your phone right now, you can scan and upload in one go without switching devices.
+            </div>
+          </div>
 
           <div className="flex flex-wrap gap-3">
             <Button type="button" size="lg" onClick={() => setStep(2)}>
-              Ik heb gescand →
+              I have scanned my room →
             </Button>
             <Link
               href="/homeowner/project/new"
               className={buttonVariants({ variant: "ghost", size: "lg" })}
             >
-              Andere methode kiezen
+              Choose a different method
             </Link>
           </div>
         </div>
@@ -166,7 +211,7 @@ export function LidarImport({ projectId }: { projectId: string }) {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="roomJson" className="text-sm font-medium">
-              Selecteer Room.json
+              Select your scan file
             </label>
             <input
               id="roomJson"
@@ -178,10 +223,10 @@ export function LidarImport({ projectId }: { projectId: string }) {
               className="rounded-lg border border-border bg-background text-sm outline-none file:mr-3 file:h-11 file:cursor-pointer file:border-0 file:border-r file:border-border file:bg-muted file:px-3 file:text-sm file:font-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
             {file ? (
-              <p className="text-xs font-medium">Gekozen bestand: {file.name}</p>
+              <p className="text-xs font-medium">Selected: {file.name}</p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Te vinden onder ‘Exporteer’ in de 3D Scanner App.
+                The scan file you exported and saved from the 3D Scanner App.
               </p>
             )}
           </div>
