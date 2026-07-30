@@ -32,6 +32,16 @@ export async function POST(request: Request) {
 
   const { user, supabase } = auth.ctx;
 
+  // Checked BEFORE `formData()`, which buffers the entire body into memory —
+  // rejecting afterwards means a 50 MB (or 5 GB) upload is already resident
+  // before we decline it, which on a small Vercel function is the whole attack.
+  // The `file.size` check below still stands as the authority; this only stops
+  // us from paying for the read.
+  const declaredLength = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_UPLOAD_BYTES) {
+    return jsonError("Het bestand is te groot (max 10 MB).", 413);
+  }
+
   let form: FormData;
   try {
     form = await request.formData();
@@ -49,7 +59,7 @@ export async function POST(request: Request) {
     );
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    return jsonError("Het bestand is te groot (max 10 MB).", 400);
+    return jsonError("Het bestand is te groot (max 10 MB).", 413);
   }
   if (typeof projectId !== "string" || !isUuid(projectId)) {
     return jsonError("Ongeldig project.", 400);

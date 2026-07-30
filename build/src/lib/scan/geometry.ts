@@ -228,9 +228,9 @@ export function parseWall(input: unknown): Wall | null {
   }
   const wallId = id as WallId;
 
-  const length = Number(raw.length);
-  const height = Number(raw.height);
-  if (!Number.isFinite(length) || !Number.isFinite(height)) return null;
+  const length = toMeasurement(raw.length);
+  const height = toMeasurement(raw.height);
+  if (length === null || height === null) return null;
 
   return {
     id: wallId,
@@ -242,21 +242,40 @@ export function parseWall(input: unknown): Wall | null {
   };
 }
 
+/**
+ * Coerces one untrusted JSON value into a measurement, or `null` if it is not
+ * one.
+ *
+ * Bare `Number()` is too generous to use on a request body: `Number(null)`,
+ * `Number("")` and `Number([])` are all 0, and `Number(true)` is 1. A hand-rolled
+ * POST of `{"id":"N","length":[],"height":true}` therefore used to parse cleanly
+ * into a 0 m x 1 m wall and only get caught downstream by the range check —
+ * which is a coincidence, not a guarantee, and would not have held for openings
+ * (`parseOpenings` has no range check of its own, so `width: true` became a real
+ * 1 m door). Only actual numbers and numeric strings are accepted here.
+ */
+function toMeasurement(input: unknown): number | null {
+  if (typeof input === "number") return Number.isFinite(input) ? input : null;
+  if (typeof input !== "string") return null;
+
+  const trimmed = input.trim();
+  if (trimmed === "") return null;
+
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function parseOpenings(input: unknown): Opening[] {
   if (!Array.isArray(input)) return [];
 
   return input.flatMap((entry): Opening[] => {
     if (typeof entry !== "object" || entry === null) return [];
     const raw = entry as Record<string, unknown>;
-    const width = Number(raw.width);
-    const height = Number(raw.height);
-    const offsetFromLeft = Number(raw.offsetFromLeft);
+    const width = toMeasurement(raw.width);
+    const height = toMeasurement(raw.height);
+    const offsetFromLeft = toMeasurement(raw.offsetFromLeft);
 
-    if (
-      !Number.isFinite(width) ||
-      !Number.isFinite(height) ||
-      !Number.isFinite(offsetFromLeft)
-    ) {
+    if (width === null || height === null || offsetFromLeft === null) {
       return [];
     }
 

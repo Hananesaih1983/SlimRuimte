@@ -107,7 +107,8 @@ export function MeasurementInput({
           }}
           onBlur={() => {
             focused.current = false;
-            setText(formatValue(value));
+            const parsed = Number.parseFloat(text.trim());
+            setText(Number.isFinite(parsed) ? parsed.toFixed(2) : formatValue(value));
           }}
           onChange={(event) => handleChange(event.target.value)}
           className={cn(

@@ -6,6 +6,7 @@ import {
   type RoomTypeId,
   type Wall,
   isRoomTypeId,
+  isWallId,
 } from "./types";
 import { DEFAULT_WALL_HEIGHT_M, parseWall } from "./geometry";
 
@@ -142,7 +143,7 @@ function loadFromStorage(): WizardDraft {
 
     const draft = parsed as Record<string, unknown>;
     const walls = Array.isArray(draft.walls)
-      ? draft.walls.map(parseWall).filter((wall): wall is Wall => wall !== null)
+      ? draft.walls.map(parseDraftWall).filter((wall): wall is Wall => wall !== null)
       : [];
 
     return {
@@ -154,4 +155,39 @@ function loadFromStorage(): WizardDraft {
     // Private-mode quota errors and hand-edited storage both land here.
     return emptyDraft();
   }
+}
+
+/**
+ * Draft-tolerant wall parser: keeps "not measured yet" as `NaN`.
+ *
+ * A half-finished draft is the normal case here, and `JSON.stringify` turns the
+ * `NaN` that `blankWalls()` uses for an unmeasured run into `null`. The strict
+ * `parseWall` used by the API correctly rejects that, which on reload dropped
+ * every blank wall, left fewer than four, and made each step fall back to
+ * `blankWalls()` — silently discarding the walls the user HAD measured. That is
+ * exactly the refresh this module exists to survive.
+ *
+ * Anything genuinely malformed (bad id, non-numeric text) is still rejected;
+ * only "absent" is treated as unmeasured. Nothing loosened here can reach the
+ * database: /api/scan/manual-save re-parses with `parseWall` and re-validates.
+ */
+function parseDraftWall(input: unknown): Wall | null {
+  if (typeof input !== "object" || input === null) return null;
+  const raw = input as Record<string, unknown>;
+  if (!isWallId(raw.id)) return null;
+
+  // Substituting a placeholder for each measurement in turn lets the strict
+  // parser do all the normalisation (label, rounding, openings) while telling us
+  // which of the two the draft actually carried.
+  const shape = parseWall({ ...raw, length: 1, height: DEFAULT_WALL_HEIGHT_M });
+  if (!shape) return null;
+
+  const withLength = parseWall({ ...raw, height: DEFAULT_WALL_HEIGHT_M });
+  const withHeight = parseWall({ ...raw, length: 1 });
+
+  return {
+    ...shape,
+    length: withLength ? withLength.length : Number.NaN,
+    height: withHeight ? withHeight.height : DEFAULT_WALL_HEIGHT_M,
+  };
 }
