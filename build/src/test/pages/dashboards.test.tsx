@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import type { User } from "@supabase/supabase-js";
+import { renderWithIntl as render } from "../helpers/intl";
 import {
   activeSession,
   createMockSupabase,
@@ -22,9 +23,18 @@ import {
  * props visible so "which account am I looking at" is still asserted here; the
  * component's own rendering is covered by NavBar.test.tsx, which shares its
  * translation keys.
+ *
+ * The Dutch strings asserted below now come from `messages/nl.json` (F17), so
+ * these tests double as the check that the dashboard namespace is complete —
+ * a missing key throws rather than rendering blank.
  */
 
 const requireRole = vi.fn();
+
+vi.mock("next-intl/server", async () => {
+  const { serverIntlMock } = await import("../helpers/intl");
+  return serverIntlMock();
+});
 
 vi.mock("@/lib/auth", () => ({
   requireRole: (role: string) => requireRole(role),

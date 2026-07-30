@@ -10,7 +10,27 @@
     "dashboard": "Dashboard",
     "projects": "Projecten",
     "profile": "Profiel",
-    "logout": "Uitloggen"
+    "logout": "Uitloggen",
+    "language": "Taal"
+  },
+  "home": {
+    "tagline": "Slim renoveren begint hier",
+    "hero_title": "Zie je verbouwing voordat je begint",
+    "hero_body": "Scan je ruimte met je telefoon of meet handmatig op. SlimRuimte maakt een exacte plattegrond, laat je nieuwe keuken of badkamer in 3D zien, en brengt je in contact met geverifieerde aannemers in Nederland en België.",
+    "cta_start": "Start gratis",
+    "cta_login": "Inloggen",
+    "cta_register": "Registreren",
+    "cta_dashboard": "Naar mijn dashboard",
+    "no_card": "Gratis te proberen · Geen creditcard nodig",
+    "value1_title": "Exacte plattegrond",
+    "value1_desc": "Scan je ruimte of meet handmatig. Nauwkeurig tot 2 cm.",
+    "value2_title": "3D renders voor je verbouwing",
+    "value2_desc": "Zie je nieuwe keuken of badkamer voor je begint.",
+    "value3_title": "Betrouwbare aannemers",
+    "value3_desc": "Drie geverifieerde aannemers ontvangen je visuele brief.",
+    "closing_title": "Klaar om je ruimte in te meten?",
+    "closing_signed_in": "Ga verder waar je gebleven was en start je volgende project.",
+    "closing_signed_out": "Maak een account aan en start je eerste project. Je hebt alleen je telefoon en tien minuten nodig."
   },
   "auth": {
     "emailLabel": "E-mailadres",
@@ -68,6 +88,22 @@
   },
   "dashboard": {
     "signedInAs": "Ingelogd als",
-    "yourRole": "Jouw rol"
+    "yourRole": "Jouw rol",
+    "welcome": "Welkom",
+    "my_projects": "Mijn projecten",
+    "new_project": "Nieuw project starten",
+    "no_projects": "Nog geen projecten",
+    "no_projects_body": "Scan je ruimte in en krijg binnen enkele minuten een plattegrond en visualisaties van je verbouwing.",
+    "projects_error": "Je projecten konden niet worden geladen. Vernieuw de pagina — je projecten zijn niet verdwenen.",
+    "untitled_project": "Verbouwing",
+    "measured_manually": "Handmatig gemeten",
+    "view_project": "Bekijk project →",
+    "leads": "Leads",
+    "no_leads": "Geen leads beschikbaar",
+    "no_leads_body": "Zodra huiseigenaren in jouw regio een project afronden, verschijnen hun aanvragen hier. Je betaalt €35 per lead die je accepteert.",
+    "assignments": "Opdrachten",
+    "no_assignments": "Geen opdrachten beschikbaar",
+    "no_assignments_body": "Zodra huiseigenaren een ontwerpvraag indienen, verschijnen hun projecten hier. Je betaalt €25 per lead die je accepteert.",
+    "subscription_required": "Voor deze functie heb je een actief abonnement nodig."
   }
 }

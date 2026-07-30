@@ -15,8 +15,7 @@ export async function RoleDashboard({
   role: Role;
   email: string | undefined;
 }) {
-  const [tCommon, tDashboard, tRoles] = await Promise.all([
-    getTranslations("common"),
+  const [tDashboard, tRoles] = await Promise.all([
     getTranslations("dashboard"),
     getTranslations("roles"),
   ]);
@@ -24,7 +23,7 @@ export async function RoleDashboard({
   return (
     <div className="flex flex-col gap-1">
       <h1 className="text-2xl font-semibold tracking-tight">
-        {tCommon("welcome")}
+        {tDashboard("welcome")}
         {email ? `, ${email}` : ""}
       </h1>
       <p className="text-sm text-muted-foreground">

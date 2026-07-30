@@ -10,7 +10,27 @@
     "dashboard": "Dashboard",
     "projects": "Projects",
     "profile": "Profile",
-    "logout": "Log out"
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "home": {
+    "tagline": "Smart renovation starts here",
+    "hero_title": "See your renovation before you start",
+    "hero_body": "Scan your room with your phone or measure it by hand. SlimRuimte builds an accurate floor plan, shows your new kitchen or bathroom in 3D, and connects you with verified contractors in the Netherlands and Belgium.",
+    "cta_start": "Get started free",
+    "cta_login": "Log in",
+    "cta_register": "Sign up",
+    "cta_dashboard": "Go to my dashboard",
+    "no_card": "Free to try · No credit card required",
+    "value1_title": "Accurate floor plan",
+    "value1_desc": "Scan your room or measure manually. Accurate to 2 cm.",
+    "value2_title": "3D renders of your renovation",
+    "value2_desc": "See your new kitchen or bathroom before you start.",
+    "value3_title": "Trusted contractors",
+    "value3_desc": "Three verified contractors receive your visual brief.",
+    "closing_title": "Ready to measure your space?",
+    "closing_signed_in": "Pick up where you left off and start your next project.",
+    "closing_signed_out": "Create an account and start your first project. All you need is your phone and ten minutes."
   },
   "auth": {
     "emailLabel": "Email address",
@@ -68,6 +88,22 @@
   },
   "dashboard": {
     "signedInAs": "Signed in as",
-    "yourRole": "Your role"
+    "yourRole": "Your role",
+    "welcome": "Welcome",
+    "my_projects": "My projects",
+    "new_project": "Start a new project",
+    "no_projects": "No projects yet",
+    "no_projects_body": "Scan your room and get a floor plan and visualisations of your renovation within minutes.",
+    "projects_error": "We couldn't load your projects. Refresh the page — your projects have not disappeared.",
+    "untitled_project": "Renovation",
+    "measured_manually": "Measured manually",
+    "view_project": "View project →",
+    "leads": "Leads",
+    "no_leads": "No leads available",
+    "no_leads_body": "As soon as homeowners in your area complete a project, their requests appear here. You pay €35 per lead you accept.",
+    "assignments": "Assignments",
+    "no_assignments": "No assignments available",
+    "no_assignments_body": "As soon as homeowners submit a design request, their projects appear here. You pay €25 per lead you accept.",
+    "subscription_required": "You need an active subscription for this feature."
   }
 }

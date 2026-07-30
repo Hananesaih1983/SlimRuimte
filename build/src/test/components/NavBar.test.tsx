@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../messages/nl.json";
 import { ROLES, ROLE_ROUTE_PREFIX, type Role } from "@/lib/roles";
@@ -100,6 +100,31 @@ describe("NavBar", () => {
     await renderNavBar({ userEmail: "test@example.nl", role });
 
     expect(screen.getByText(ROLE_LABELS[role])).toBeInTheDocument();
+  });
+
+  it("carries the language switcher, so the choice follows the user into the app", async () => {
+    await renderNavBar({ userEmail: "test@example.nl", role: "homeowner" });
+
+    const group = screen.getByRole("group", { name: "Taal" });
+
+    expect(within(group).getAllByRole("button").map((b) => b.textContent)).toEqual([
+      "NL",
+      "EN",
+      "FR",
+    ]);
+  });
+
+  it("puts the switcher between the identity and the logout button", async () => {
+    await renderNavBar({ userEmail: "test@example.nl", role: "homeowner" });
+
+    const email = screen.getByText("test@example.nl");
+    const group = screen.getByRole("group", { name: "Taal" });
+    const logout = screen.getByRole("button", { name: "Uitloggen" });
+
+    // 4 = Node.DOCUMENT_POSITION_FOLLOWING: email → switcher → logout, so the
+    // switcher never separates the user from the way out of the app.
+    expect(email.compareDocumentPosition(group) & 4).toBeTruthy();
+    expect(group.compareDocumentPosition(logout) & 4).toBeTruthy();
   });
 
   it("points the brand at the homepage", async () => {

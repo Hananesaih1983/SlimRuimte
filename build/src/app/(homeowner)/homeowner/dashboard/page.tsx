@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/empty-state";
 import { RoleDashboard } from "@/components/role-dashboard";
 import { buttonVariants } from "@/components/ui/button";
@@ -6,6 +8,7 @@ import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PROJECT_STATUS_LABELS } from "@/lib/projects";
 import { ROOM_TYPES } from "@/lib/scan/types";
+import { FORMAT_LOCALE, isLocale } from "@/i18n/config";
 
 type ProjectRow = {
   id: string;
@@ -19,6 +22,7 @@ type ProjectRow = {
 export default async function HomeownerDashboardPage() {
   const { user } = await requireRole("homeowner");
   const supabase = await createClient();
+  const [t, locale] = await Promise.all([getTranslations("dashboard"), getLocale()]);
 
   // RLS (`project_owner`) already scopes this to the caller; the explicit
   // homeowner_id filter keeps the index on (homeowner_id, status, created_at).
@@ -37,13 +41,13 @@ export default async function HomeownerDashboardPage() {
 
       <section className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Mijn projecten</h2>
+          <h2 className="text-lg font-semibold">{t("my_projects")}</h2>
           {error || rows.length > 0 ? (
             <Link
               href="/homeowner/project/new"
               className={buttonVariants({ size: "lg" })}
             >
-              Nieuw project starten
+              {t("new_project")}
             </Link>
           ) : null}
         </div>
@@ -56,31 +60,34 @@ export default async function HomeownerDashboardPage() {
             role="alert"
             className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
           >
-            Je projecten konden niet worden geladen. Vernieuw de pagina — je
-            projecten zijn niet verdwenen.
+            {t("projects_error")}
           </p>
         ) : rows.length === 0 ? (
-          <EmptyState
-            icon="📐"
-            title="Nog geen projecten"
-            body="Scan je ruimte in en krijg binnen enkele minuten een plattegrond en visualisaties van je verbouwing."
-          >
+          <EmptyState icon="📐" title={t("no_projects")} body={t("no_projects_body")}>
             <Link
               href="/homeowner/project/new"
               className={buttonVariants({ size: "lg" })}
             >
-              Nieuw project starten
+              {t("new_project")}
             </Link>
           </EmptyState>
         ) : (
-          <ProjectList projects={rows} />
+          <ProjectList projects={rows} locale={locale} />
         )}
       </section>
     </div>
   );
 }
 
-function ProjectList({ projects }: { projects: ProjectRow[] }) {
+function ProjectList({
+  projects,
+  locale,
+}: {
+  projects: ProjectRow[];
+  locale: string;
+}) {
+  const t = useTranslations("dashboard");
+
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
       {projects.map((project) => {
@@ -100,7 +107,7 @@ function ProjectList({ projects }: { projects: ProjectRow[] }) {
                     {roomType?.icon ?? "🏠"}
                   </span>
                   <span className="text-sm font-medium">
-                    {project.title ?? roomType?.label ?? "Verbouwing"}
+                    {project.title ?? roomType?.label ?? t("untitled_project")}
                   </span>
                 </span>
                 <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
@@ -109,14 +116,14 @@ function ProjectList({ projects }: { projects: ProjectRow[] }) {
               </div>
 
               <p className="text-xs text-muted-foreground">
-                {formatDate(project.created_at)}
+                {formatDate(project.created_at, locale)}
                 {project.scan_method
-                  ? ` · ${project.scan_method === "lidar" ? "LiDAR" : "Handmatig gemeten"}`
+                  ? ` · ${project.scan_method === "lidar" ? "LiDAR" : t("measured_manually")}`
                   : ""}
               </p>
 
               <span className="mt-auto text-sm font-medium text-primary">
-                Bekijk project →
+                {t("view_project")}
               </span>
             </Link>
           </li>
@@ -126,13 +133,16 @@ function ProjectList({ projects }: { projects: ProjectRow[] }) {
   );
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, locale: string): string {
   if (!value) return "—";
 
-  return new Intl.DateTimeFormat("nl-NL", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Europe/Amsterdam",
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat(
+    isLocale(locale) ? FORMAT_LOCALE[locale] : FORMAT_LOCALE.nl,
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "Europe/Amsterdam",
+    },
+  ).format(new Date(value));
 }

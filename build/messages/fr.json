@@ -10,7 +10,27 @@
     "dashboard": "Tableau de bord",
     "projects": "Projets",
     "profile": "Profil",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "language": "Langue"
+  },
+  "home": {
+    "tagline": "La rénovation intelligente commence ici",
+    "hero_title": "Visualisez votre rénovation avant de commencer",
+    "hero_body": "Scannez votre pièce avec votre téléphone ou mesurez-la à la main. SlimRuimte réalise un plan précis, montre votre nouvelle cuisine ou salle de bain en 3D et vous met en relation avec des entrepreneurs vérifiés aux Pays-Bas et en Belgique.",
+    "cta_start": "Commencer gratuitement",
+    "cta_login": "Se connecter",
+    "cta_register": "S'inscrire",
+    "cta_dashboard": "Mon tableau de bord",
+    "no_card": "Essai gratuit · Sans carte bancaire",
+    "value1_title": "Plan précis",
+    "value1_desc": "Scannez votre pièce ou mesurez manuellement. Précis à 2 cm.",
+    "value2_title": "Rendus 3D de votre rénovation",
+    "value2_desc": "Visualisez votre nouvelle cuisine ou salle de bain avant de commencer.",
+    "value3_title": "Entrepreneurs de confiance",
+    "value3_desc": "Trois entrepreneurs vérifiés reçoivent votre dossier visuel.",
+    "closing_title": "Prêt à mesurer votre espace ?",
+    "closing_signed_in": "Reprenez là où vous vous êtes arrêté et lancez votre prochain projet.",
+    "closing_signed_out": "Créez un compte et lancez votre premier projet. Il vous suffit de votre téléphone et de dix minutes."
   },
   "auth": {
     "emailLabel": "Adresse e-mail",
@@ -68,6 +88,22 @@
   },
   "dashboard": {
     "signedInAs": "Connecté en tant que",
-    "yourRole": "Votre rôle"
+    "yourRole": "Votre rôle",
+    "welcome": "Bienvenue",
+    "my_projects": "Mes projets",
+    "new_project": "Démarrer un nouveau projet",
+    "no_projects": "Aucun projet pour l'instant",
+    "no_projects_body": "Scannez votre pièce et obtenez en quelques minutes un plan et des visualisations de votre rénovation.",
+    "projects_error": "Impossible de charger vos projets. Actualisez la page — vos projets n'ont pas disparu.",
+    "untitled_project": "Rénovation",
+    "measured_manually": "Mesuré manuellement",
+    "view_project": "Voir le projet →",
+    "leads": "Leads",
+    "no_leads": "Aucun lead disponible",
+    "no_leads_body": "Dès que des propriétaires de votre région finalisent un projet, leurs demandes apparaissent ici. Vous payez 35 € par lead accepté.",
+    "assignments": "Missions",
+    "no_assignments": "Aucune mission disponible",
+    "no_assignments_body": "Dès que des propriétaires soumettent une demande de conception, leurs projets apparaissent ici. Vous payez 25 € par lead accepté.",
+    "subscription_required": "Un abonnement actif est nécessaire pour cette fonctionnalité."
   }
 }

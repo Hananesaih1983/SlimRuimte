@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import type { User } from "@supabase/supabase-js";
+import { renderWithIntl } from "../helpers/intl";
 
 /**
  * The homepage is the one page that renders with NO session — the proxy does not
@@ -11,12 +12,20 @@ import type { User } from "@supabase/supabase-js";
  * `@/lib/auth` is mocked rather than Supabase itself: the page's only server
  * dependency is `getSessionUser()`, and mocking at that seam keeps the test
  * about the page instead of about cookie plumbing.
+ *
+ * The copy now comes from the `home` namespace (F17), so the Dutch assertions
+ * below are also the check that `messages/nl.json` still carries every key the
+ * page asks for — a typo'd key throws instead of rendering.
  */
 
 const getSessionUser = vi.fn<() => Promise<User | null>>();
 
 vi.mock("@/lib/auth", () => ({
   getSessionUser: () => getSessionUser(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
 }));
 
 const { default: Home } = await import("@/app/page");
@@ -33,7 +42,7 @@ function signedInUser(): User {
 }
 
 async function renderHome() {
-  return render(await Home());
+  return renderWithIntl(await Home());
 }
 
 /** Every href the page renders, so a dead link cannot hide in the markup. */
@@ -70,6 +79,28 @@ describe("homepage", () => {
     await renderHome();
 
     expect(screen.getByRole("link", { name: "SlimRuimte" })).toHaveAttribute("href", "/");
+  });
+
+  it("lets a visitor switch language before they have an account", async () => {
+    // The switcher has to be reachable signed OUT: a French-speaking Belgian
+    // homeowner lands here first, and a Dutch-only funnel loses them.
+    await renderHome();
+
+    const group = screen.getByRole("group", { name: "Taal" });
+
+    expect(within(group).getAllByRole("button").map((b) => b.textContent)).toEqual([
+      "NL",
+      "EN",
+      "FR",
+    ]);
+  });
+
+  it("keeps the switcher available while signed in", async () => {
+    getSessionUser.mockResolvedValue(signedInUser());
+
+    await renderHome();
+
+    expect(screen.getByRole("group", { name: "Taal" })).toBeInTheDocument();
   });
 
   it("leads with the promise, in Dutch", async () => {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ROLE_ROUTE_PREFIX, type Role } from "@/lib/roles";
 
 /**
@@ -51,6 +52,7 @@ export async function NavBar({
           <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {tRoles(`${role}.name`)}
           </span>
+          <LanguageSwitcher />
           <LogoutButton />
         </div>
       </nav>
