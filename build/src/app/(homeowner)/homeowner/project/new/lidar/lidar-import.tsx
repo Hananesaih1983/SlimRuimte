@@ -129,6 +129,7 @@ export function LidarImport({ projectId }: { projectId: string }) {
               <li className="flex gap-2"><span>✅</span><span><strong>Open all doors</strong> — so the app can see the full doorframe.</span></li>
               <li className="flex gap-2"><span>✅</span><span><strong>Keep furniture in place</strong> — sofas, tables, and beds are fine. The app ignores them automatically.</span></li>
               <li className="flex gap-2"><span>✅</span><span><strong>Good lighting</strong> — turn on the lights. Bright rooms scan better.</span></li>
+              <li className="flex gap-2"><span>✅</span><span><strong>Close the curtains</strong> — sunlight coming through windows can confuse the scanner. Closed curtains or blinds give a much better result.</span></li>
               <li className="flex gap-2"><span>❌</span><span><strong>Avoid mirrors and glass</strong> — large mirrors can confuse the scanner. Stand with your back to them when possible.</span></li>
             </ul>
           </div>
