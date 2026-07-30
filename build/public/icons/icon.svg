@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    Placeholder SR monogram — replace with the designed mark when one exists.
+    scripts/generate-icons.mjs re-renders the PNGs in this folder from this file.
+
+    Declared "any maskable" in the manifest, so everything meaningful stays
+    inside the maskable safe zone (the centre circle of radius 40% = 205px).
+  -->
+  <rect width="512" height="512" fill="#18181b"/>
+  <text
+    x="256"
+    y="256"
+    fill="#ffffff"
+    font-family="Arial, Helvetica, 'DejaVu Sans', sans-serif"
+    font-size="200"
+    font-weight="700"
+    letter-spacing="-6"
+    text-anchor="middle"
+    dominant-baseline="central"
+  >SR</text>
+</svg>

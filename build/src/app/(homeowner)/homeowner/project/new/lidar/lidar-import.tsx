@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { RoomDiagramSVG } from "@/components/scan/RoomDiagramSVG";
 import type { RoomDimensions } from "@/lib/scan/types";
 
@@ -23,7 +24,7 @@ const SCAN_STEPS = [
 ];
 
 const WRONG_FILE_TYPE =
-  "Selecteer een geldig Room.json bestand (geëxporteerd uit 3D Scanner App).";
+  "Please select the file exported from the 3D Scanner App (All Data or USDZ format).";
 
 export function LidarImport({ projectId }: { projectId: string }) {
   const router = useRouter();
@@ -112,6 +113,9 @@ export function LidarImport({ projectId }: { projectId: string }) {
       {step === 1 ? (
         <div className="flex flex-col gap-8">
 
+          {/* Install nudge — shown first because installing changes the steps below */}
+          <InstallPrompt />
+
           {/* App download */}
           <div className="flex flex-col gap-3">
             <h2 className="text-base font-semibold">Step 1 — Download the free scanning app</h2>
@@ -163,27 +167,34 @@ export function LidarImport({ projectId }: { projectId: string }) {
 
           {/* How to share */}
           <div className="flex flex-col gap-3">
-            <h2 className="text-base font-semibold">Step 4 — Share your scan with SlimRuimte</h2>
+            <h2 className="text-base font-semibold">Step 4 — Save and share your scan with SlimRuimte</h2>
             <ol className="flex flex-col gap-3 text-sm">
               <li className="flex gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">1</span>
-                <span>After scanning, tap the <strong>Share</strong> icon (the square with an arrow pointing up).</span>
+                <span>After scanning, tap the <strong>Share icon</strong> (the square with an arrow pointing up — usually top-right of the screen).</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">2</span>
-                <span>Select <strong>Export</strong> → then choose <strong>Room Plan</strong> from the list of export options.</span>
+                <span>A list of file formats appears. Tap <strong>“All Data”</strong> — this gives us the full room measurements. (If you don’t see “All Data”, tap <strong>“USDZ”</strong> instead.)</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">3</span>
-                <span>Tap <strong>Save to Files</strong> and save it anywhere on your phone (Downloads or Desktop works fine).</span>
+                <span>The iOS Share Sheet slides up. Look for <strong>“Save to Files”</strong> in the list — you may need to <strong>scroll down</strong> in the grey icons row to find it.</span>
               </li>
               <li className="flex gap-3">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">4</span>
-                <span>Come back here and tap <strong>"Upload my scan"</strong> below — then find and select the file you just saved.</span>
+                <span>Tap <strong>“Save to Files”</strong> → choose <strong>“On My iPhone”</strong> → tap <strong>Save</strong> in the top-right corner.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">5</span>
+                <span>Come back here and tap <strong>“Upload my scan”</strong> below → tap Browse → find your file under “On My iPhone” → tap it to upload.</span>
               </li>
             </ol>
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              💡 <strong>Tip:</strong> If you are on your phone right now, you can scan and upload in one go without switching devices.
+              💡 <strong>Can’t find “Save to Files”?</strong> In the Share Sheet, scroll the bottom row of options to the right — or tap <strong>“More”</strong> at the end of the row. You can also use <strong>AirDrop</strong> to send the file to your Mac and upload from there.
+            </div>
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              💡 <strong>On your phone right now?</strong> Install SlimRuimte to your home screen (tap Share in Safari → Add to Home Screen) so you can jump between the scanner and this page without losing your work. On Android you can then share the scan straight to SlimRuimte; on iPhone and iPad you still save the file first — Safari does not yet let websites appear in the share sheet.
             </div>
           </div>
 
@@ -218,7 +229,7 @@ export function LidarImport({ projectId }: { projectId: string }) {
               id="roomJson"
               name="file"
               type="file"
-              accept=".json,application/json"
+              accept=".json,.usdz,.reality,.zip,application/json,model/vnd.usdz+zip,application/zip"
               required
               onChange={handleFileChange}
               className="rounded-lg border border-border bg-background text-sm outline-none file:mr-3 file:h-11 file:cursor-pointer file:border-0 file:border-r file:border-border file:bg-muted file:px-3 file:text-sm file:font-medium focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -257,7 +268,9 @@ export function LidarImport({ projectId }: { projectId: string }) {
 }
 
 function isJsonFile(file: File): boolean {
-  return file.name.toLowerCase().endsWith(".json");
+  const name = file.name.toLowerCase();
+  return name.endsWith(".json") || name.endsWith(".usdz") || 
+         name.endsWith(".reality") || name.endsWith(".zip");
 }
 
 function ImportSuccess({

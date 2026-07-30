@@ -22,9 +22,9 @@ export const metadata: Metadata = {
 export default async function NewProjectPage({
   searchParams,
 }: {
-  searchParams: Promise<{ projectId?: string }>;
+  searchParams: Promise<{ projectId?: string; from?: string }>;
 }) {
-  const [{ projectId }, requestHeaders] = await Promise.all([
+  const [{ projectId, from }, requestHeaders] = await Promise.all([
     searchParams,
     headers(),
   ]);
@@ -42,6 +42,17 @@ export default async function NewProjectPage({
           plattegrond op.
         </p>
       </div>
+
+      {/* Arrived from the OS share sheet (see /api/share-target). The shared
+          file is not carried across yet, so say so instead of letting the user
+          wonder where their scan went. */}
+      {from === "share" ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          💡 <strong>Je scan is gedeeld met SlimRuimte.</strong> Kies hieronder
+          de LiDAR-methode en upload het bestand — dan koppelen we het aan een
+          nieuw project.
+        </div>
+      ) : null}
 
       <PathSelector
         lidarLikely={capability.lidarLikely}
